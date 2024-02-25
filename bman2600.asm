@@ -17,6 +17,7 @@ P0POSY                  byte        ; player position Y
 P0SPRPTR                word        ; Pointer to P0 sprite lookup table
 P0COLPTR                word        ; Pointer to P0 color lookup table
 P0ANMSET                byte        ; P0 sprite animation frame offset
+P0DRAW                  byte        ; P0 Draw Height
 ANIMCOUNTER             byte        ; Current animation update countdown
 MOVECOUNTER             byte        ; Counter to track updating movement
 ANIM_FRAME              byte        ; Tracks if we're on first or second animation frame
@@ -26,11 +27,12 @@ ARENA_SWITCH            byte        ; Toggle tracker
 ARENACOUNTER            byte        ; Tracks the update for the arena
 ; ARENAPTRPF1             word
 ; ARENAPTRPF2             word
-BOMB_SPRITE_PTR         word 
+BOMB_SPRITE_PTR         word        ;
+TEMP                    ds 1        ; Scratch Variable
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; Define Constants
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;P0_HGT                  = $11       ; player 0 sprite height (# rows in lookup table)
+;PLAYER_HEIGHT                  = $11       ; player 0 sprite height (# rows in lookup table)
 MOVE_RATE               = 160       ; Speed of player movement (255 == 100%)
 ANIM_RATE               = 20        ; Speed of player movement (255 == 100%)
 SPRITE_OFFSET_IDLE      = 0         ; Offset position of facing idle sprite
@@ -44,7 +46,7 @@ LEFT_BOUNDS             = $0A       ; Left Player Boundary
 RIGHT_BOUNDS            = $6c       ; Right Player Boundary
 VERTICAL_STEP           = $1
 HORIZONTAL_STEP         = $1
-ARENA_HEIGHT            = 87        ; (0-87)*2=176 scanlines for arena (2LK)
+ARENA_HEIGHT            = 165        ; (0-83)*2=166 scanlines for arena (2LK)
 ARENA_BG                = $C3
 
 X_LANE_START            = $1E
@@ -77,7 +79,7 @@ RESET:
     sta ANIM_FRAME              ; Set first animation frame to 0
     lda #$0b
     sta P0POSX                  ; Set Player 0 X
-    lda #$97
+    lda #$79
     sta P0POSY                  ; Set Player 0 Y
 
     lda #15
@@ -166,49 +168,98 @@ SCORE_PANEL:
     sta WSYNC                   ;  3                - wait for scanline
     dex                         ;  2                - X--
     bne SCORE_PANEL             ;  2                - repeat until score panel is drawn
-GAME_SCREEN_SETUP:
+ARENA_SETUP:
     lda #ARENA_BG               ;                   - background color  (61st scanline)
     sta COLUBK                  ;                   - set background color
     lda #$09                    ;                   - playfield color
     sta COLUPF                  ;                   - set playfield color
-    ldx #165                    ;                   - playfield scanlines
     lda #1
     sta ARENACOUNTER            ;                   - We pull new arena data every 15 lines
     lda #%11110000              ; 2                 - Load PF0 slice (Always the same, so outside of loop)
     sta PF0                     ; 3                 - set PF0
 ;---------------------------------------------------- START OF GAME PLAY ZONE    
                                 ; Cycles    Total   - Comment
+; Load Arena Height into X
+    ldy #ARENA_HEIGHT           ;                   - playfield scanlines
+    lda #$ff
+    sta COLUP0
+; Start Loop
+; ARENA_LOOP:
+; ; Pre-Calc Line 1
+;     lda #PLAYER_HEIGHT-1        ;     2             -
+;     dcp P0DRAW                  ;     5             -
+;     bcs .DRAW_GROUP_0           ;     2             -
+;     lda #0                      ;     2             -
+;     .byte $2C                   ;     4             -
+; .DRAW_GROUP_0                   ;                   -
+;     lda (P0SPRPTR),y            ;     5             -
+;     sta WSYNC                   ;     3             -
+; ; ----------------------------------------------------
+; ; Line 1 Draw
+;     sta GRP0                    ;     3        3
+
+
+; Pre-Calc Line 2
+; Load Group 1
+; WSYNC
+;   sta WSYNC    
+; Draw Group 1
+; Dec Arena Height
+; Back to Start
+;    dey                         ;    2
+;    bpl ARENA_LOOP              ;    2      
+
+;; --------------------------------------------
+;; TODO
+;; Figure out how to add the animation offset to the P0SPRPTR
+;; Do the same for the P0COLPTR
+;; Reconfigure the map lay out for player movement, collision, bounds
+;; See if there's a way to pre-calc the arena counter
+;; It's better to aim for the same cycles per scanline beause you can 
+;; control the maximum then and always know what it will be
+
+
 .SLINE_LOOP                     ;                   - Gameplay Zone Scanline Loop
+    lda #PLAYER_HEIGHT-1        ;     2             -
+    dcp P0DRAW                  ;     5             -
+    bcs .DRAW_GROUP_0           ;     2             -
+    lda #0                      ;     2             -
+    .byte $2C                   ;     4             -
+.DRAW_GROUP_0                   ;                   -
+    lda (P0SPRPTR),y            ;     5             -
     sta WSYNC                   ;     3      0/78   - Start new Scanline
+    sta GRP0                    ;     3        3
+
+
 .ARENA_COUNT_DOWN               ; (7/8 Cycles)      - Every 15 scanlines update PF1 and PF2
     dec ARENACOUNTER            ;     5      5      - Count down arena draw counter 
-    bne .INSIDE_P0              ;     2/3    7/9    - Jump to sprite check if no arena update needed
+    bne .DECREMENT_SCANLINE     ;     2/3    7/9    - Jump to sprite check if no arena update needed
 .RST_ARENA_COUNTER              ; (5 Cycles)        - [UPDATE ARENA] Reset update counter
     lda #15                     ;     2      9      - Reset Arena map update counter
     sta ARENACOUNTER            ;     3     12      - Store the arena draw counter
 .DRAW_ARENA                     ; (22 Cycles)       - 
-    ldy ARENAINDEX              ;     3     15      - Get the map data offset
-    lda ARENA_0_PF1,y           ;     4     19      - Load PF1
+    ldx ARENAINDEX              ;     3     15      - Get the map data offset
+    lda ARENA_0_PF1,x           ;     4     19      - Load PF1
     sta PF1                     ;     3     22      - set PF1 slice
-    lda ARENA_0_PF2,y           ;     4     26      - Load PF2
+    lda ARENA_0_PF2,x           ;     4     26      - Load PF2
     sta PF2                     ;     3     29      - Set PF2 slice
     inc ARENAINDEX              ;     5     34      - Move to next line of arena map data
      
-.INSIDE_P0:                     ; (13/14 Cycles)    - P0 Position draw check 
-    txa                         ;     2     36      - Transfer X to A
-    sec                         ;     2     38      - Set carry before subtraction
-    sbc P0POSY                  ;     3     41      - Subtract sprite Y coord
-    cmp #P0_HGT                 ;     2     43      - Current scanline inside p0 sprite bounds?
-    bcc .DRAWSPRP0              ;     2/3   45      - Draw P0 sprite routine
-    lda #0                      ;     2     47      - else, index to 0
-.DRAWSPRP0:                     ; (23 Cycles)       - P0 Draw sprite slice
-    clc                         ;     2     49      -  
-    adc P0ANMSET                ;     3     52      - Add animation frame offset ($0/$44)
-    tay                         ;     2     54      - load Y so we can work with pointer
-    lda (P0SPRPTR),Y            ;     5     59      - 
-    sta GRP0                    ;     3     62      - set graphics for player0
-    lda (P0COLPTR),Y            ;     5     67      -
-    sta COLUP0                  ;     3     70      - set color of player 0
+;.INSIDE_P0:                     ; (13/14 Cycles)    - P0 Position draw check 
+;     txa                         ;     2     36      - Transfer X to A
+;     sec                         ;     2     38      - Set carry before subtraction
+;     sbc P0POSY                  ;     3     41      - Subtract sprite Y coord
+;     cmp #PLAYER_HEIGHT          ;     2     43      - Current scanline inside p0 sprite bounds?
+;     bcc .DRAWSPRP0              ;     2/3   45      - Draw P0 sprite routine
+;     lda #0                      ;     2     47      - else, index to 0
+; .DRAWSPRP0:                     ; (23 Cycles)       - P0 Draw sprite slice
+;     clc                         ;     2     49      -  
+;     adc P0ANMSET                ;     3     52      - Add animation frame offset ($0/$44)
+;     tay                         ;     2     54      - load Y so we can work with pointer
+;     lda (P0SPRPTR),Y            ;     5     59      - 
+;     sta GRP0                    ;     3     62      - set graphics for player0
+;     lda (P0COLPTR),Y            ;     5     67      -
+;     sta COLUP0                  ;     3     70      - set color of player 0
 
 
 ; .INSIDE_BOMB:
@@ -227,8 +278,8 @@ GAME_SCREEN_SETUP:
 ;     sta COLUP1
 
 .DECREMENT_SCANLINE             ; (5 Cycles)        - Decrement Scanline loop 
-    dex                         ;     2     72      - Reduce scanline counter (x)
-    bne .SLINE_LOOP             ;     3     75      - repeat until screen is drawn
+   dey                         ;     2     72      - Reduce scanline counter (x)
+   bne .SLINE_LOOP             ;     3     75      - repeat until screen is drawn
 ;---------------------------------------------------- END OF GAME PLAY ZONE
 
 
@@ -510,6 +561,32 @@ SETXPOS Subroutine
     sta RESP0,Y                 ; reset the 15-step rough position
     sta WSYNC                   ;
     sta HMOVE                   ; Apply fine position
+
+    ; Prepare P0 Y for 2LK
+    ldx #1
+    lda P0POSY
+    clc 
+    adc #1
+    lsr 
+    sta TEMP
+
+    ; P0 Sprite Height in Arena
+    lda #(ARENA_HEIGHT + PLAYER_HEIGHT)
+    sec 
+    sbc TEMP
+    sta P0DRAW
+
+    ; P0 Sprite Pointer
+    lda #<(IdleSprite + PLAYER_HEIGHT - 1)
+    sec 
+    sbc TEMP
+    sta P0SPRPTR
+    lda #>(IdleSprite + PLAYER_HEIGHT - 1)
+    sbc #0
+    sta P0SPRPTR+1
+
+    
+
     rts 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -533,7 +610,7 @@ IdleSprite:
         .byte #%00111000;$0E
         .byte #%00001100;$58
         .byte #%00001100;$58
-P0_HGT = * - IdleSprite
+PLAYER_HEIGHT = * - IdleSprite
 DownSprite:
         .byte #%00000000;$0E
         .byte #%00100000;$58
