@@ -1,0 +1,208 @@
+--- Symbol List (sorted by symbol)
+0.ARENA_COUNT_DOWN       f097                  
+0.BOTTOM                 f0c6                  
+0.DECREMENT_SCANLINE     f0c3                  
+0.DRAW_ARENA             f09f                  
+0.DRAWSPRP0              f0b7              (R )
+0.FREE_BYTES             0000                  
+0.INSIDE_P0              f0ad              (R )
+0.RST_ARENA_COUNTER      f09b                  
+0.SKIPANIM               f056              (R )
+0.SKIPMOVE               f062              (R )
+0.SLINE_LOOP             f095              (R )
+1.CLEAR_STACK            f006              (R )
+10.DIVIDE_LOOP           f22e              (R )
+2.VSLP1                  f039              (R )
+3.lines                  0014              (R )
+4.waittimer              f069              (R )
+5.lines                  001e              (R )
+6.waittimer              f0dc              (R )
+7.DN_DONT_MOVE           f168              (R )
+7.DN_EXIT                f16f              (R )
+7.DN_EXIT_2              f174                  
+7.DN_LOOP                f145                  
+7.DN_NEXT_LANE           f143              (R )
+7.DN_RETURN              f17a              (R )
+7.DN_WALK                f16b              (R )
+7.DN_WALK_LEFT           f15c                  
+7.DN_WALK_RIGHT          f162              (R )
+7.LEFT_DONT_MOVE         f1b8              (R )
+7.LEFT_EXIT              f1bf              (R )
+7.LEFT_LOOP              f195                  
+7.LEFT_NEXT_LANE         f193              (R )
+7.LEFT_RETURN            f1c5              (R )
+7.LEFT_WALK              f1bb              (R )
+7.LEFT_WALK_DOWN         f1ac                  
+7.LEFT_WALK_UP           f1b2              (R )
+7.RIGHT_DONT_MOVE        f201              (R )
+7.RIGHT_EXIT             f208              (R )
+7.RIGHT_LOOP             f1de                  
+7.RIGHT_NEXT_LANE        f1dc              (R )
+7.RIGHT_RETURN           f20e              (R )
+7.RIGHT_WALK             f204              (R )
+7.RIGHT_WALK_DOWN        f1f5                  
+7.RIGHT_WALK_UP          f1fb              (R )
+7.UP_DONT_MOVE           f121              (R )
+7.UP_EXIT                f125                  
+7.UP_EXIT_2              f12a                  
+7.UP_LOOP                f0fe                  
+7.UP_NEXT_LANE           f0fc              (R )
+7.UP_RETURN              f130              (R )
+7.UP_WALK                f124              (R )
+7.UP_WALK_LEFT           f115                  
+7.UP_WALK_RIGHT          f11b              (R )
+9.COLP0PF                f223              (R )
+ANIM_FRAME               0089              (R )
+ANIM_RATE                0014              (R )
+ANIMCOUNTER              0087              (R )
+ANIMUPDATE               f047                  
+ARENA_0_PF0              f35c                  
+ARENA_0_PF1              f369              (R )
+ARENA_0_PF2              f374              (R )
+ARENA_BG                 00c3              (R )
+ARENA_HEIGHT             0057                  
+ARENA_SWITCH             008b                  
+ARENACOUNTER             008c              (R )
+ARENAINDEX               008a              (R )
+AUDC0                    0015                  
+AUDC1                    0016                  
+AUDF0                    0017                  
+AUDF1                    0018                  
+AUDV0                    0019                  
+AUDV1                    001a                  
+Bomb0                    f2cb              (R )
+BOMB_HGT                 0009                  
+BOMB_SPRITE_PTR          008d              (R )
+BOTTOM_PANEL             f0d0              (R )
+CKCOLP0PF                f21a                  
+ColorFrame0              f2d4              (R )
+ColorFrame1              f2e5                  
+ColorFrame2              f2f6                  
+ColorFrame3              f307                  
+ColorFrame4              f318                  
+ColorFrame5              f329                  
+ColorFrame6              f33a                  
+ColorFrame7              f34b                  
+COLUBK                   0009              (R )
+COLUP0                   0006              (R )
+COLUP1                   0007                  
+COLUPF                   0008              (R )
+CTRLPF                   000a              (R )
+CXBLPF                   0006                  
+CXCLR                    002c              (R )
+CXM0FB                   0004                  
+CXM0P                    0000                  
+CXM1FB                   0005                  
+CXM1P                    0001                  
+CXP0FB                   0002              (R )
+CXP1FB                   0003                  
+CXPPMM                   0007                  
+DOWN_BOUNDS              0000              (R )
+DownSprite               f254                  
+DownSprite1              f298                  
+ENABL                    001f                  
+ENAM0                    001d                  
+ENAM1                    001e                  
+ENDCKCOL                 f224              (R )
+GAME_SCREEN_SETUP        f083                  
+GRP0                     001b              (R )
+GRP1                     001c                  
+HMBL                     0024                  
+HMCLR                    002b              (R )
+HMM0                     0022                  
+HMM1                     0023                  
+HMOVE                    002a              (R )
+HMP0                     0020              (R )
+HMP1                     0021                  
+HORIZONTAL_STEP          0001                  
+IdleSprite               f243              (R )
+IdleSprite1              f287                  
+INP_P0_RST               f20f              (R )
+INPT0                    0008                  
+INPT1                    0009                  
+INPT2                    000a                  
+INPT3                    000b                  
+INPT4                    000c                  
+INPT5                    000d                  
+INTIM                    0284              (R )
+IPT_P0_DN                f131              (R )
+IPT_P0_LT                f17b              (R )
+IPT_P0_ND                f216                  
+IPT_P0_RT                f1c6              (R )
+IPT_P0_UP                f0e6                  
+LEFT_BOUNDS              000a              (R )
+MOVE_RATE                00a0              (R )
+MOVECOUNTER              0088              (R )
+MOVEUPDATE               f056                  
+NEXTFRAME                f217              (R )
+NUSIZ0                   0004                  
+NUSIZ1                   0005                  
+OVERSCAN                 f0d5                  
+P0_HGT                   0011                  
+P0ANMSET                 0086              (R )
+P0COLPTR                 0084              (R )
+P0POSX                   0080              (R )
+P0POSY                   0081              (R )
+P0SPRPTR                 0082              (R )
+PF0                      000d              (R )
+PF1                      000e              (R )
+PF2                      000f              (R )
+ProcessJoystick          f0e4              (R )
+REFP0                    000b              (R )
+REFP1                    000c                  
+RESBL                    0014                  
+RESET                    f000              (R )
+RESM0                    0012                  
+RESM1                    0013                  
+RESMP0                   0028                  
+RESMP1                   0029                  
+RESP0                    0010              (R )
+RESP1                    0011                  
+RIGHT_BOUNDS             006c              (R )
+RightSprite              f276                  
+RightSprite1             f2ba                  
+RSYNC                    0003                  
+SCORE_PANEL              f07e              (R )
+SETXPOS                  f229              (R )
+SPRITE_FRAME_OFFSET      0044              (R )
+SPRITE_OFFSET_DOWN       0011              (R )
+SPRITE_OFFSET_IDLE       0000              (R )
+SPRITE_OFFSET_RIGHT      0033              (R )
+SPRITE_OFFSET_UP         0022              (R )
+STARTFRAME               f037              (R )
+SWACNT                   0281                  
+SWBCNT                   0283                  
+SWCHA                    0280              (R )
+SWCHB                    0282                  
+T1024T                   0297                  
+TEST_BOMB_X              000a                  
+TEST_BOMB_Y              007a                  
+TIA_BASE_ADDRESS         0000              (R )
+TIA_BASE_READ_ADDRESS    0000              (R )
+TIA_BASE_WRITE_ADDRESS   0000              (R )
+TIM1T                    0294                  
+TIM64T                   0296              (R )
+TIM8T                    0295                  
+TIMINT                   0285                  
+UP_BOUNDS                0098              (R )
+UpSprite                 f265                  
+UpSprite1                f2a9                  
+VBLANK                   0001                  
+VDELBL                   0027                  
+VDELP0                   0025                  
+VDELP1                   0026                  
+VERSION_MACRO            006a                  
+VERSION_VCS              0069                  
+VERTICAL_STEP            0001                  
+VSYNC                    0000              (R )
+WSYNC                    0002              (R )
+X_LANE_BLOCKED           0007              (R )
+X_LANE_START             001e              (R )
+X_LANE_WALK_DOWN         000f              (R )
+X_LANE_WALK_UP           0007              (R )
+Y_LANE_BLOCKED           0005              (R )
+Y_LANE_START             000a              (R )
+Y_LANE_UPDATE            0010              (R )
+Y_LANE_WALK_LEFT         0005              (R )
+Y_LANE_WALK_RIGHT        0005              (R )
+--- End of Symbol List.

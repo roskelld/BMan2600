@@ -26,10 +26,11 @@ ARENA_SWITCH            byte        ; Toggle tracker
 ARENACOUNTER            byte        ; Tracks the update for the arena
 ; ARENAPTRPF1             word
 ; ARENAPTRPF2             word
+BOMB_SPRITE_PTR         word 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; Define Constants
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-P0_HGT                  = $11       ; player 0 sprite height (# rows in lookup table)
+;P0_HGT                  = $11       ; player 0 sprite height (# rows in lookup table)
 MOVE_RATE               = 160       ; Speed of player movement (255 == 100%)
 ANIM_RATE               = 20        ; Speed of player movement (255 == 100%)
 SPRITE_OFFSET_IDLE      = 0         ; Offset position of facing idle sprite
@@ -56,6 +57,10 @@ Y_LANE_UPDATE           = $10
 Y_LANE_WALK_RIGHT       = $5
 Y_LANE_BLOCKED          = $5
 Y_LANE_WALK_LEFT        = $5
+
+BOMB_HGT                = $9
+TEST_BOMB_X             = $0A       ; 
+TEST_BOMB_Y             = $7A       ; Cell 38
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; Start ROM segment
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -92,6 +97,11 @@ RESET:
     sta P0COLPTR                ; lo-byte pointer for P0 color lookup table
     lda #>ColorFrame0
     sta P0COLPTR+1              ; hi-byte pointer for P0 color lookup table
+
+    lda #<Bomb0
+    sta BOMB_SPRITE_PTR
+    lda #>Bomb0
+    sta BOMB_SPRITE_PTR+1
 
     ; lda #<ARENA_0_PF1
     ; sta ARENAPTRPF1
@@ -166,6 +176,7 @@ GAME_SCREEN_SETUP:
     sta ARENACOUNTER            ;                   - We pull new arena data every 15 lines
     lda #%11110000              ; 2                 - Load PF0 slice (Always the same, so outside of loop)
     sta PF0                     ; 3                 - set PF0
+;---------------------------------------------------- START OF GAME PLAY ZONE    
                                 ; Cycles    Total   - Comment
 .SLINE_LOOP                     ;                   - Gameplay Zone Scanline Loop
     sta WSYNC                   ;     3      0/78   - Start new Scanline
@@ -182,6 +193,7 @@ GAME_SCREEN_SETUP:
     lda ARENA_0_PF2,y           ;     4     26      - Load PF2
     sta PF2                     ;     3     29      - Set PF2 slice
     inc ARENAINDEX              ;     5     34      - Move to next line of arena map data
+     
 .INSIDE_P0:                     ; (13/14 Cycles)    - P0 Position draw check 
     txa                         ;     2     36      - Transfer X to A
     sec                         ;     2     38      - Set carry before subtraction
@@ -191,20 +203,39 @@ GAME_SCREEN_SETUP:
     lda #0                      ;     2     47      - else, index to 0
 .DRAWSPRP0:                     ; (23 Cycles)       - P0 Draw sprite slice
     clc                         ;     2     49      -  
-    adc P0ANMSET                ;     3     52      - 
+    adc P0ANMSET                ;     3     52      - Add animation frame offset ($0/$44)
     tay                         ;     2     54      - load Y so we can work with pointer
     lda (P0SPRPTR),Y            ;     5     59      - 
     sta GRP0                    ;     3     62      - set graphics for player0
     lda (P0COLPTR),Y            ;     5     67      -
     sta COLUP0                  ;     3     70      - set color of player 0
+
+
+; .INSIDE_BOMB:
+;     txa
+;     sec 
+;     sbc #TEST_BOMB_Y
+;     cmp #BOMB_HGT
+;     bcc .DRAWBOMB
+;     lda #0
+; .DRAWBOMB
+;     clc
+;     tay 
+;     lda (BOMB_SPRITE_PTR),Y
+;     sta GRP1 
+;     lda #$0
+;     sta COLUP1
+
 .DECREMENT_SCANLINE             ; (5 Cycles)        - Decrement Scanline loop 
     dex                         ;     2     72      - Reduce scanline counter (x)
     bne .SLINE_LOOP             ;     3     75      - repeat until screen is drawn
-                                ;-------------------- END OF GAME PLAY ZONE
+;---------------------------------------------------- END OF GAME PLAY ZONE
+
+
 
 .BOTTOM                         ;                   - [BOTTOM PANEL] Start of Bottom Panel
     sta WSYNC                   ;-----3 ----78------- wait for scanline
-    ldx #6                      ;     2             - Bottom panel scanlines
+    ldx #6                      ;     2             - Bottom panel scanlines (6 for P0 color 19 for not)
     lda #$07                    ;     2             - panel color
     sta COLUBK                  ;     3             - background
     sta COLUPF                  ;     3             - playfield set both the same to create border
@@ -463,7 +494,6 @@ ENDCKCOL:                       ; Fallback
 ;; Y is object (0: P0, 1: P1, 2: MISSILE0, 3: MISSILE1, 4: BALL)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SETXPOS Subroutine
-    lda P0POSX                  ; load register A with P0 position X
     sta WSYNC                   ; Start fresh scanline
     sta HMCLR                   ; clear old horizontal position values
     sec                         ; set carry flag before subtraction
@@ -503,6 +533,7 @@ IdleSprite:
         .byte #%00111000;$0E
         .byte #%00001100;$58
         .byte #%00001100;$58
+P0_HGT = * - IdleSprite
 DownSprite:
         .byte #%00000000;$0E
         .byte #%00100000;$58
@@ -630,6 +661,17 @@ RightSprite1:
         .byte #%01100000;$58
         .byte #%01100000;$58  
 ;---End Graphics Data---
+
+Bomb0
+        .byte #%00000000;$0E
+        .byte #%00011000;$0E
+        .byte #%00111100;$0E
+        .byte #%00111100;$0E
+        .byte #%00111100;$0E
+        .byte #%00111100;$0E
+        .byte #%00011000;$0E
+        .byte #%00001010;$1C
+        .byte #%00000100;$1C
 
 ;---Color Data from PlayerPal 2600---
 ColorFrame0
