@@ -40,16 +40,17 @@ SPRITE_OFFSET_DOWN      = $11       ; Offset position of facing down sprite
 SPRITE_OFFSET_UP        = $22       ; Offset position of facing up sprite
 SPRITE_OFFSET_RIGHT     = $33       ; Offset position of facing right sprite
 SPRITE_FRAME_OFFSET     = $44       ; Second frame of animation offset
-UP_BOUNDS               = $98       ; Top Player Boundary
-DOWN_BOUNDS             = $00       ; Bottom Player Boundary
+UP_BOUNDS               = $A8       ; Top Player Boundary
+DOWN_BOUNDS             = $10       ; Bottom Player Boundary
 LEFT_BOUNDS             = $0A       ; Left Player Boundary
 RIGHT_BOUNDS            = $6c       ; Right Player Boundary
 VERTICAL_STEP           = $1
 HORIZONTAL_STEP         = $1
-ARENA_HEIGHT            = 165        ; (0-83)*2=166 scanlines for arena (2LK)
+ARENA_HEIGHT            = $A5        ; (0-83)*2=166 scanlines for arena (2LK)
 ARENA_BG                = $C3
 
-X_LANE_START            = $1E
+X_LANE_START            = $10
+X_LANE_UPDATE           = $1E
 X_LANE_WALK_UP          = $7
 X_LANE_BLOCKED          = $7
 X_LANE_WALK_DOWN        = $F
@@ -79,7 +80,7 @@ RESET:
     sta ANIM_FRAME              ; Set first animation frame to 0
     lda #$0b
     sta P0POSX                  ; Set Player 0 X
-    lda #$79
+    lda #$A5
     sta P0POSY                  ; Set Player 0 Y
 
     lda #15
@@ -179,10 +180,9 @@ ARENA_SETUP:
     sta PF0                     ; 3                 - set PF0
 ;---------------------------------------------------- START OF GAME PLAY ZONE    
                                 ; Cycles    Total   - Comment
-; Load Arena Height into X
-    ldy #ARENA_HEIGHT           ;                   - playfield scanlines
     lda #$ff
     sta COLUP0
+
 ; Start Loop
 ; ARENA_LOOP:
 ; ; Pre-Calc Line 1
@@ -218,17 +218,18 @@ ARENA_SETUP:
 ;; It's better to aim for the same cycles per scanline beause you can 
 ;; control the maximum then and always know what it will be
 
-
+; Load Arena Height into Y
+    ldy #ARENA_HEIGHT           ;                   - playfield scanlines
 .SLINE_LOOP                     ;                   - Gameplay Zone Scanline Loop
     lda #PLAYER_HEIGHT-1        ;     2             -
     dcp P0DRAW                  ;     5             -
     bcs .DRAW_GROUP_0           ;     2             -
     lda #0                      ;     2             -
-    .byte $2C                   ;     4             -
+    .byte $2C                   ;     4             - Skips next line via absolute addressing
 .DRAW_GROUP_0                   ;                   -
     lda (P0SPRPTR),y            ;     5             -
     sta WSYNC                   ;     3      0/78   - Start new Scanline
-    sta GRP0                    ;     3        3
+    sta GRP0                    ;     3      3      - Write A to P0 register
 
 
 .ARENA_COUNT_DOWN               ; (7/8 Cycles)      - Every 15 scanlines update PF1 and PF2
@@ -302,6 +303,56 @@ OVERSCAN:
     TIMER_WAIT
 
     jmp NEXTFRAME
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Subroutine to handle object horizontal position with fine offset
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; A is target X-coord position
+;; Y is object (0: P0, 1: P1, 2: MISSILE0, 3: MISSILE1, 4: BALL)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SETXPOS Subroutine
+    sta WSYNC                   ; Start fresh scanline
+    sta HMCLR                   ; clear old horizontal position values
+    sec                         ; set carry flag before subtraction
+.DIVIDE_LOOP:   
+    sbc #15                     ; A -= 15
+    bcs .DIVIDE_LOOP            ; Loop while carry flag is still set
+
+    eor #7                      ; adjust remainder in A between -8 and 7
+    asl                         ; shift left by 4 as HMP0 only uses 4 bits
+    asl
+    asl
+    asl
+    sta HMP0,Y                  ; set the fine position
+    sta RESP0,Y                 ; reset the 15-step rough position
+    sta WSYNC                   ;
+    sta HMOVE                   ; Apply fine position
+
+    ; Prepare P0 Y for 2LK
+    ldx #1                      ; preload X for setting VDELPx
+    lda P0POSY                  ; get the P0 Y position
+    ;clc                         ;
+    ;adc #1                      ; add 1 to compensate for priming of GRP0 
+    ; Removed the divide, not sure how to incorporate it into the code
+    ;lsr                         ; divide by 2 for the 2LK position
+    sta TEMP                    ; save for position calculations
+
+    ; P0 Sprite Height in Arena
+    ; P0DRAW = ARENA_HEIGHT + PLAYER_HEIGHT - P0POSY + 1
+    lda #(ARENA_HEIGHT + PLAYER_HEIGHT)
+    sec 
+    sbc P0POSY
+    sta P0DRAW
+
+    ; P0 Sprite Pointer
+    lda #<(#IdleSprite + PLAYER_HEIGHT - 1) 
+    sec
+    sbc TEMP
+    sta P0SPRPTR
+    lda #>(#IdleSprite + PLAYER_HEIGHT - 1)
+    sbc #0
+    sta P0SPRPTR+1
+
+    rts 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Process joystick input for player 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -427,9 +478,9 @@ IPT_P0_LT:
 
     ;; Lane Check Loop
     ldy P0POSY
-    lda #0                      ;                   - Clears A so it can add lane loop value
+    lda #X_LANE_START            ;                   - Sets a to bottom bounds
 .LEFT_NEXT_LANE                 ;                   -
-    adc #X_LANE_START           ;                   - Lane loop value
+    adc #X_LANE_UPDATE           ;                   - Lane loop value
 .LEFT_LOOP                      ;                   -
     clc                         ;                   -
     cmp P0POSY                  ;                   -
@@ -475,9 +526,9 @@ IPT_P0_RT:
 
     ;; Lane Check Loop
     ldy P0POSY
-    lda #0                      ;                   - Clears A so it can add lane loop value
+    lda #X_LANE_START            ;                   - Sets a to bottom bounds
 .RIGHT_NEXT_LANE                ;                   -
-    adc #X_LANE_START           ;                   - Lane loop value
+    adc #X_LANE_UPDATE           ;                   - Lane loop value
 .RIGHT_LOOP                     ;                   -
     clc                         ;                   -
     cmp P0POSY                  ;                   -
@@ -539,59 +590,10 @@ ENDCKCOL:                       ; Fallback
     jmp STARTFRAME              ; Didn't collide go to next frame
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Subroutine to handle object horizontal position with fine offset
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; A is target X-coord position
-;; Y is object (0: P0, 1: P1, 2: MISSILE0, 3: MISSILE1, 4: BALL)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SETXPOS Subroutine
-    sta WSYNC                   ; Start fresh scanline
-    sta HMCLR                   ; clear old horizontal position values
-    sec                         ; set carry flag before subtraction
-.DIVIDE_LOOP:   
-    sbc #15                     ; A -= 15
-    bcs .DIVIDE_LOOP            ; Loop while carry flag is still set
-
-    eor #7                      ; adjust remainder in A between -8 and 7
-    asl                         ; shift left by 4 as HMP0 only uses 4 bits
-    asl
-    asl
-    asl
-    sta HMP0,Y                  ; set the fine position
-    sta RESP0,Y                 ; reset the 15-step rough position
-    sta WSYNC                   ;
-    sta HMOVE                   ; Apply fine position
-
-    ; Prepare P0 Y for 2LK
-    ldx #1
-    lda P0POSY
-    clc 
-    adc #1
-    lsr 
-    sta TEMP
-
-    ; P0 Sprite Height in Arena
-    lda #(ARENA_HEIGHT + PLAYER_HEIGHT)
-    sec 
-    sbc TEMP
-    sta P0DRAW
-
-    ; P0 Sprite Pointer
-    lda #<(IdleSprite + PLAYER_HEIGHT - 1)
-    sec 
-    sbc TEMP
-    sta P0SPRPTR
-    lda #>(IdleSprite + PLAYER_HEIGHT - 1)
-    sbc #0
-    sta P0SPRPTR+1
-
-    
-
-    rts 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sprites
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+FRAMETEST = #$44
+;PLAYER_HEIGHT = #17
 IdleSprite:
         .byte #%00000000;$0E
         .byte #%00101000;$58
@@ -737,6 +739,7 @@ RightSprite1:
         .byte #%00111000;$0E
         .byte #%01100000;$58
         .byte #%01100000;$58  
+
 ;---End Graphics Data---
 
 Bomb0

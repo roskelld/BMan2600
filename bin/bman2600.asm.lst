@@ -434,36 +434,37 @@
      40 U0091		       00 22	   SPRITE_OFFSET_UP =	$22	; Offset position of facing up sprite
      41 U0091		       00 33	   SPRITE_OFFSET_RIGHT =	$33	; Offset position of facing right sprite
      42 U0091		       00 44	   SPRITE_FRAME_OFFSET =	$44	; Second frame of animation offset
-     43 U0091		       00 98	   UP_BOUNDS  =	$98	; Top Player Boundary
-     44 U0091		       00 00	   DOWN_BOUNDS =	$00	; Bottom Player Boundary
+     43 U0091		       00 a8	   UP_BOUNDS  =	$A8	; Top Player Boundary
+     44 U0091		       00 10	   DOWN_BOUNDS =	$10	; Bottom Player Boundary
      45 U0091		       00 0a	   LEFT_BOUNDS =	$0A	; Left Player Boundary
      46 U0091		       00 6c	   RIGHT_BOUNDS =	$6c	; Right Player Boundary
      47 U0091		       00 01	   VERTICAL_STEP =	$1
      48 U0091		       00 01	   HORIZONTAL_STEP =	$1
-     49 U0091		       00 a5	   ARENA_HEIGHT =	165	; (0-83)*2=166 scanlines for arena (2LK)
+     49 U0091		       00 a5	   ARENA_HEIGHT =	$A5	; (0-83)*2=166 scanlines for arena (2LK)
      50 U0091		       00 c3	   ARENA_BG   =	$C3
      51 U0091
-     52 U0091		       00 1e	   X_LANE_START =	$1E
-     53 U0091		       00 07	   X_LANE_WALK_UP =	$7
-     54 U0091		       00 07	   X_LANE_BLOCKED =	$7
-     55 U0091		       00 0f	   X_LANE_WALK_DOWN =	$F
-     56 U0091
-     57 U0091		       00 0a	   Y_LANE_START =	$0A
-     58 U0091		       00 10	   Y_LANE_UPDATE =	$10
-     59 U0091		       00 05	   Y_LANE_WALK_RIGHT =	$5
-     60 U0091		       00 05	   Y_LANE_BLOCKED =	$5
-     61 U0091		       00 05	   Y_LANE_WALK_LEFT =	$5
-     62 U0091
-     63 U0091		       00 09	   BOMB_HGT   =	$9
-     64 U0091		       00 0a	   TEST_BOMB_X =	$0A	; 
-     65 U0091		       00 7a	   TEST_BOMB_Y =	$7A	; Cell 38
-     66 U0091							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-     67 U0091							;; Start ROM segment
-     68 U0091							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     69  10000 ????				       seg	code
-     70  f000					      org	$F000
-     71  f000
-     72  f000				   RESET
+     52 U0091		       00 10	   X_LANE_START =	$10
+     53 U0091		       00 1e	   X_LANE_UPDATE =	$1E
+     54 U0091		       00 07	   X_LANE_WALK_UP =	$7
+     55 U0091		       00 07	   X_LANE_BLOCKED =	$7
+     56 U0091		       00 0f	   X_LANE_WALK_DOWN =	$F
+     57 U0091
+     58 U0091		       00 0a	   Y_LANE_START =	$0A
+     59 U0091		       00 10	   Y_LANE_UPDATE =	$10
+     60 U0091		       00 05	   Y_LANE_WALK_RIGHT =	$5
+     61 U0091		       00 05	   Y_LANE_BLOCKED =	$5
+     62 U0091		       00 05	   Y_LANE_WALK_LEFT =	$5
+     63 U0091
+     64 U0091		       00 09	   BOMB_HGT   =	$9
+     65 U0091		       00 0a	   TEST_BOMB_X =	$0A	; 
+     66 U0091		       00 7a	   TEST_BOMB_Y =	$7A	; Cell 38
+     67 U0091							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+     68 U0091							;; Start ROM segment
+     69 U0091							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     70  10000 ????				       seg	code
+     71  f000					      org	$F000
+     72  f000
+     73  f000				   RESET
       0  f000					      CLEAN_START		; Macro to safely clear the memory
       1  f000		       78		      sei
       2  f001		       d8		      cld
@@ -476,247 +477,245 @@
       9  f008		       48		      pha
      10  f009		       d0 fb		      bne	.CLEAR_STACK
      11  f00b
-     74  f00b
-     75  f00b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-     76  f00b							;; Init Variables
-     77  f00b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     78  f00b		       a9 00		      lda	#%00000000
-     79  f00d		       85 8a		      sta	ANIM_FRAME	; Set first animation frame to 0
-     80  f00f		       a9 0b		      lda	#$0b
-     81  f011		       85 80		      sta	P0POSX	; Set Player 0 X
-     82  f013		       a9 79		      lda	#$79
-     83  f015		       85 81		      sta	P0POSY	; Set Player 0 Y
-     84  f017
-     85  f017		       a9 0f		      lda	#15
-     86  f019		       85 8d		      sta	ARENACOUNTER	; Set the Arena counter
-     87  f01b		       a9 00		      lda	#0
-     88  f01d		       85 8b		      sta	ARENAINDEX	; Offset of arena map data
-     89  f01f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-     90  f01f							;; Init Pointers
-     91  f01f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     92  f01f
-     93  f01f		       a9 5c		      lda	#<IdleSprite
-     94  f021		       85 82		      sta	P0SPRPTR	; lo-byte pointer for P0 sprite lookup table
-     95  f023		       a9 f2		      lda	#>IdleSprite
-     96  f025		       85 83		      sta	P0SPRPTR+1	; hi-byte pointer for P0 sprite lookup table
-     97  f027
-     98  f027		       a9 ed		      lda	#<ColorFrame0
-     99  f029		       85 84		      sta	P0COLPTR	; lo-byte pointer for P0 color lookup table
-    100  f02b		       a9 f2		      lda	#>ColorFrame0
-    101  f02d		       85 85		      sta	P0COLPTR+1	; hi-byte pointer for P0 color lookup table
-    102  f02f
-    103  f02f		       a9 e4		      lda	#<Bomb0
-    104  f031		       85 8e		      sta	BOMB_SPRITE_PTR
-    105  f033		       a9 f2		      lda	#>Bomb0
-    106  f035		       85 8f		      sta	BOMB_SPRITE_PTR+1
-    107  f037
-    108  f037							; lda #<ARENA_0_PF1
-    109  f037							; sta ARENAPTRPF1
-    110  f037							; lda #>ARENA_0_PF1
-    111  f037							; sta ARENAPTRPF1+1
-    112  f037
-    113  f037							; lda #<ARENA_0_PF2
-    114  f037							; sta ARENAPTRPF2
-    115  f037							; lda #>ARENA_0_PF2
-    116  f037							; sta ARENAPTRPF2+1
-    117  f037
-    118  f037							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-    119  f037							;; Start a new frame loop
-    120  f037							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    121  f037				   STARTFRAME
+     75  f00b
+     76  f00b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+     77  f00b							;; Init Variables
+     78  f00b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     79  f00b		       a9 00		      lda	#%00000000
+     80  f00d		       85 8a		      sta	ANIM_FRAME	; Set first animation frame to 0
+     81  f00f		       a9 0b		      lda	#$0b
+     82  f011		       85 80		      sta	P0POSX	; Set Player 0 X
+     83  f013		       a9 a5		      lda	#$A5
+     84  f015		       85 81		      sta	P0POSY	; Set Player 0 Y
+     85  f017
+     86  f017		       a9 0f		      lda	#15
+     87  f019		       85 8d		      sta	ARENACOUNTER	; Set the Arena counter
+     88  f01b		       a9 00		      lda	#0
+     89  f01d		       85 8b		      sta	ARENAINDEX	; Offset of arena map data
+     90  f01f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+     91  f01f							;; Init Pointers
+     92  f01f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     93  f01f
+     94  f01f		       a9 58		      lda	#<IdleSprite
+     95  f021		       85 82		      sta	P0SPRPTR	; lo-byte pointer for P0 sprite lookup table
+     96  f023		       a9 f2		      lda	#>IdleSprite
+     97  f025		       85 83		      sta	P0SPRPTR+1	; hi-byte pointer for P0 sprite lookup table
+     98  f027
+     99  f027		       a9 e9		      lda	#<ColorFrame0
+    100  f029		       85 84		      sta	P0COLPTR	; lo-byte pointer for P0 color lookup table
+    101  f02b		       a9 f2		      lda	#>ColorFrame0
+    102  f02d		       85 85		      sta	P0COLPTR+1	; hi-byte pointer for P0 color lookup table
+    103  f02f
+    104  f02f		       a9 e0		      lda	#<Bomb0
+    105  f031		       85 8e		      sta	BOMB_SPRITE_PTR
+    106  f033		       a9 f2		      lda	#>Bomb0
+    107  f035		       85 8f		      sta	BOMB_SPRITE_PTR+1
+    108  f037
+    109  f037							; lda #<ARENA_0_PF1
+    110  f037							; sta ARENAPTRPF1
+    111  f037							; lda #>ARENA_0_PF1
+    112  f037							; sta ARENAPTRPF1+1
+    113  f037
+    114  f037							; lda #<ARENA_0_PF2
+    115  f037							; sta ARENAPTRPF2
+    116  f037							; lda #>ARENA_0_PF2
+    117  f037							; sta ARENAPTRPF2+1
+    118  f037
+    119  f037							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    120  f037							;; Start a new frame loop
+    121  f037							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    122  f037				   STARTFRAME
       0  f037					      VERTICAL_SYNC
       1  f037		       a9 0e		      lda	#%1110
       2  f039		       85 02	   .VSLP1     sta	WSYNC
       3  f03b		       85 00		      sta	VSYNC
       4  f03d		       4a		      lsr
       5  f03e		       d0 f9		      bne	.VSLP1
-    123  f040							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-    124  f040							;; VBLANK - 37 SCANLINES
-    125  f040							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    124  f040							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    125  f040							;; VBLANK - 37 SCANLINES
+    126  f040							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       0  f040					      TIMER_SETUP	20
       1  f040				   .lines     SET	20
       2  f040		       a9 16		      lda	#(((.lines-1)*76-14)/64)
       3  f042		       85 02		      sta	WSYNC
       4  f044		       8d 96 02 	      sta	TIM64T
-    127  f047							; Cycles    Total   - Comment
-    128  f047				   ANIMUPDATE
-    129  f047		       a5 88		      lda	ANIMCOUNTER	;		     -
-    130  f049		       18		      clc		;		     -
-    131  f04a		       69 14		      adc	#ANIM_RATE	;		     -
-    132  f04c		       85 88		      sta	ANIMCOUNTER	;		     -
-    133  f04e		       90 06		      bcc	.SKIPANIM	;		     -
-    134  f050		       a5 8a		      lda	ANIM_FRAME	;		     -
-    135  f052		       49 44		      EOR	#SPRITE_FRAME_OFFSET	;		     -
-    136  f054		       85 8a		      sta	ANIM_FRAME	;		     -
-    137  f056				   .SKIPANIM		;		     -
-    138  f056				   MOVEUPDATE		;		     -
-    139  f056		       a5 89		      lda	MOVECOUNTER	;		     -
-    140  f058		       18		      clc		;		     -
-    141  f059		       69 a0		      adc	#MOVE_RATE	;		     -
-    142  f05b		       85 89		      sta	MOVECOUNTER	;		     -
-    143  f05d		       90 03		      bcc	.SKIPMOVE	;		     -
-    144  f05f		       20 df f0 	      jsr	ProcessJoystick	;		     -
-    145  f062				   .SKIPMOVE		;		     -
-    146  f062		       a5 80		      lda	P0POSX	;		     -
-    147  f064		       a0 00		      ldy	#0	;		     - Set Y to tell SETXPOS P0 sprite 
-    148  f066		       20 24 f2 	      jsr	SETXPOS	;		     - Set P0 horizontal position
-    149  f069
-    150  f069							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-    151  f069							;; END VBLANK
-    152  f069							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    128  f047							; Cycles    Total   - Comment
+    129  f047				   ANIMUPDATE
+    130  f047		       a5 88		      lda	ANIMCOUNTER	;		     -
+    131  f049		       18		      clc		;		     -
+    132  f04a		       69 14		      adc	#ANIM_RATE	;		     -
+    133  f04c		       85 88		      sta	ANIMCOUNTER	;		     -
+    134  f04e		       90 06		      bcc	.SKIPANIM	;		     -
+    135  f050		       a5 8a		      lda	ANIM_FRAME	;		     -
+    136  f052		       49 44		      EOR	#SPRITE_FRAME_OFFSET	;		     -
+    137  f054		       85 8a		      sta	ANIM_FRAME	;		     -
+    138  f056				   .SKIPANIM		;		     -
+    139  f056				   MOVEUPDATE		;		     -
+    140  f056		       a5 89		      lda	MOVECOUNTER	;		     -
+    141  f058		       18		      clc		;		     -
+    142  f059		       69 a0		      adc	#MOVE_RATE	;		     -
+    143  f05b		       85 89		      sta	MOVECOUNTER	;		     -
+    144  f05d		       90 03		      bcc	.SKIPMOVE	;		     -
+    145  f05f		       20 13 f1 	      jsr	ProcessJoystick	;		     -
+    146  f062				   .SKIPMOVE		;		     -
+    147  f062		       a5 80		      lda	P0POSX	;		     -
+    148  f064		       a0 00		      ldy	#0	;		     - Set Y to tell SETXPOS P0 sprite 
+    149  f066		       20 df f0 	      jsr	SETXPOS	;		     - Set P0 horizontal position
+    150  f069
+    151  f069							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    152  f069							;; END VBLANK
+    153  f069							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       0  f069					      TIMER_WAIT
       1  f069				   .waittimer
       2  f069		       ad 84 02 	      lda	INTIM
       3  f06c		       d0 fb		      bne	.waittimer
-    154  f06e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    155  f06e							;; Display 192 SCANLINES
-    156  f06e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    157  f06e							; clean up ;; find a better place to do this
-    158  f06e		       a9 00		      lda	#0
-    159  f070		       85 8b		      sta	ARENAINDEX
-    160  f072							; Cycles    Total   - Comment
-    161  f072		       a2 19		      ldx	#25	;  2		     - Score scanlines
-    162  f074		       a9 07		      lda	#$07	;  2		     - color
-    163  f076		       85 09		      sta	COLUBK	;  3		     - background
-    164  f078		       85 08		      sta	COLUPF	;  3		     - playfield
-    165  f07a		       a9 01		      lda	#%00000001	;		     - Reflect on
-    166  f07c		       85 0a		      sta	CTRLPF	;		     - Set playfield reflection to true
-    167  f07e				   SCORE_PANEL
-    168  f07e		       85 02		      sta	WSYNC	;  3		     - wait for scanline
-    169  f080		       ca		      dex		;  2		     - X--
-    170  f081		       d0 fb		      bne	SCORE_PANEL	;  2		     - repeat until score panel is drawn
-    171  f083				   ARENA_SETUP
-    172  f083		       a9 c3		      lda	#ARENA_BG	;		     - background color  (61st scanline)
-    173  f085		       85 09		      sta	COLUBK	;		     - set background color
-    174  f087		       a9 09		      lda	#$09	;		     - playfield color
-    175  f089		       85 08		      sta	COLUPF	;		     - set playfield color
-    176  f08b		       a9 01		      lda	#1
-    177  f08d		       85 8d		      sta	ARENACOUNTER	;		     - We pull new arena data every 15 lines
-    178  f08f		       a9 f0		      lda	#%11110000	; 2		     - Load PF0 slice (Always the same, so outside of loop)
-    179  f091		       85 0d		      sta	PF0	; 3		     - set PF0
-    180  f093							;---------------------------------------------------- START OF GAME PLAY ZONE	  
-    181  f093							; Cycles    Total   - Comment
-    182  f093							; Load Arena Height into X
-    183  f093		       a0 a5		      ldy	#ARENA_HEIGHT	;		     - playfield scanlines
-    184  f095		       a9 ff		      lda	#$ff
-    185  f097		       85 06		      sta	COLUP0
-    186  f099							; Start Loop
-    187  f099							; ARENA_LOOP:
-    188  f099							; ; Pre-Calc Line 1
-    189  f099							;     lda #PLAYER_HEIGHT-1	   ;	 2	       -
-    190  f099							;     dcp P0DRAW		   ;	 5	       -
-    191  f099							;     bcs .DRAW_GROUP_0	   ;	 2	       -
-    192  f099							;     lda #0			   ;	 2	       -
-    193  f099							;     .byte $2C		   ;	 4	       -
-    194  f099							; .DRAW_GROUP_0		   ;		       -
-    195  f099							;     lda (P0SPRPTR),y 	   ;	 5	       -
-    196  f099							;     sta WSYNC		   ;	 3	       -
-    197  f099							; ; ----------------------------------------------------
-    198  f099							; ; Line 1 Draw
-    199  f099							;     sta GRP0 		   ;	 3	  3
-    200  f099
-    201  f099
-    202  f099							; Pre-Calc Line 2
-    203  f099							; Load Group 1
-    204  f099							; WSYNC
-    205  f099							;   sta WSYNC	  
-    206  f099							; Draw Group 1
-    207  f099							; Dec Arena Height
-    208  f099							; Back to Start
-    209  f099							;    dey			  ;    2
-    210  f099							;    bpl ARENA_LOOP		  ;    2      
-    211  f099
-    212  f099							;; --------------------------------------------
-    213  f099							;; TODO
-    214  f099							;; Figure out how to add the animation offset to the P0SPRPTR
-    215  f099							;; Do the same for the P0COLPTR
-    216  f099							;; Reconfigure the map lay out for player movement and collision 
-    217  f099
-    218  f099
-    219  f099
-    220  f099
-    221  f099
-    222  f099
-    223  f099
-    224  f099				   .SLINE_LOOP		;		     - Gameplay Zone Scanline Loop
-    225  f099		       a9 10		      lda	#PLAYER_HEIGHT-1	;     2	     -
-    226  f09b		       c7 87		      dcp	P0DRAW	;     5	     -
-    227  f09d		       b0 03		      bcs	.DRAW_GROUP_0	;     2	     -
-    228  f09f		       a9 00		      lda	#0	;     2	     -
-    229  f0a1		       2c		      .byte.b	$2C	;     4	     -
-    230  f0a2				   .DRAW_GROUP_0		;		     -
-    231  f0a2		       b1 82		      lda	(P0SPRPTR),y	;     5	     -
-    232  f0a4		       85 02		      sta	WSYNC	;     3      0/78   - Start new Scanline
-    233  f0a6		       85 1b		      sta	GRP0	;     3	3
+    155  f06e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    156  f06e							;; Display 192 SCANLINES
+    157  f06e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    158  f06e							; clean up ;; find a better place to do this
+    159  f06e		       a9 00		      lda	#0
+    160  f070		       85 8b		      sta	ARENAINDEX
+    161  f072							; Cycles    Total   - Comment
+    162  f072		       a2 19		      ldx	#25	;  2		     - Score scanlines
+    163  f074		       a9 07		      lda	#$07	;  2		     - color
+    164  f076		       85 09		      sta	COLUBK	;  3		     - background
+    165  f078		       85 08		      sta	COLUPF	;  3		     - playfield
+    166  f07a		       a9 01		      lda	#%00000001	;		     - Reflect on
+    167  f07c		       85 0a		      sta	CTRLPF	;		     - Set playfield reflection to true
+    168  f07e				   SCORE_PANEL
+    169  f07e		       85 02		      sta	WSYNC	;  3		     - wait for scanline
+    170  f080		       ca		      dex		;  2		     - X--
+    171  f081		       d0 fb		      bne	SCORE_PANEL	;  2		     - repeat until score panel is drawn
+    172  f083				   ARENA_SETUP
+    173  f083		       a9 c3		      lda	#ARENA_BG	;		     - background color  (61st scanline)
+    174  f085		       85 09		      sta	COLUBK	;		     - set background color
+    175  f087		       a9 09		      lda	#$09	;		     - playfield color
+    176  f089		       85 08		      sta	COLUPF	;		     - set playfield color
+    177  f08b		       a9 01		      lda	#1
+    178  f08d		       85 8d		      sta	ARENACOUNTER	;		     - We pull new arena data every 15 lines
+    179  f08f		       a9 f0		      lda	#%11110000	; 2		     - Load PF0 slice (Always the same, so outside of loop)
+    180  f091		       85 0d		      sta	PF0	; 3		     - set PF0
+    181  f093							;---------------------------------------------------- START OF GAME PLAY ZONE	  
+    182  f093							; Cycles    Total   - Comment
+    183  f093		       a9 ff		      lda	#$ff
+    184  f095		       85 06		      sta	COLUP0
+    185  f097
+    186  f097							; Start Loop
+    187  f097							; ARENA_LOOP:
+    188  f097							; ; Pre-Calc Line 1
+    189  f097							;     lda #PLAYER_HEIGHT-1	   ;	 2	       -
+    190  f097							;     dcp P0DRAW		   ;	 5	       -
+    191  f097							;     bcs .DRAW_GROUP_0	   ;	 2	       -
+    192  f097							;     lda #0			   ;	 2	       -
+    193  f097							;     .byte $2C		   ;	 4	       -
+    194  f097							; .DRAW_GROUP_0		   ;		       -
+    195  f097							;     lda (P0SPRPTR),y 	   ;	 5	       -
+    196  f097							;     sta WSYNC		   ;	 3	       -
+    197  f097							; ; ----------------------------------------------------
+    198  f097							; ; Line 1 Draw
+    199  f097							;     sta GRP0 		   ;	 3	  3
+    200  f097
+    201  f097
+    202  f097							; Pre-Calc Line 2
+    203  f097							; Load Group 1
+    204  f097							; WSYNC
+    205  f097							;   sta WSYNC	  
+    206  f097							; Draw Group 1
+    207  f097							; Dec Arena Height
+    208  f097							; Back to Start
+    209  f097							;    dey			  ;    2
+    210  f097							;    bpl ARENA_LOOP		  ;    2      
+    211  f097
+    212  f097							;; --------------------------------------------
+    213  f097							;; TODO
+    214  f097							;; Figure out how to add the animation offset to the P0SPRPTR
+    215  f097							;; Do the same for the P0COLPTR
+    216  f097							;; Reconfigure the map lay out for player movement, collision, bounds
+    217  f097							;; See if there's a way to pre-calc the arena counter
+    218  f097							;; It's better to aim for the same cycles per scanline beause you can 
+    219  f097							;; control the maximum then and always know what it will be
+    220  f097
+    221  f097							; Load Arena Height into Y
+    222  f097		       a0 a5		      ldy	#ARENA_HEIGHT	;		     - playfield scanlines
+    223  f099				   .SLINE_LOOP		;		     - Gameplay Zone Scanline Loop
+    224  f099		       a9 10		      lda	#PLAYER_HEIGHT-1	;     2	     -
+    225  f09b		       c7 87		      dcp	P0DRAW	;     5	     -
+    226  f09d		       b0 03		      bcs	.DRAW_GROUP_0	;     2	     -
+    227  f09f		       a9 00		      lda	#0	;     2	     -
+    228  f0a1		       2c		      .byte.b	$2C	;     4	     - Skips next line via absolute addressing
+    229  f0a2				   .DRAW_GROUP_0		;		     -
+    230  f0a2		       b1 82		      lda	(P0SPRPTR),y	;     5	     -
+    231  f0a4		       85 02		      sta	WSYNC	;     3      0/78   - Start new Scanline
+    232  f0a6		       85 1b		      sta	GRP0	;     3      3      - Write A to P0 register
+    233  f0a8
     234  f0a8
-    235  f0a8
-    236  f0a8				   .ARENA_COUNT_DOWN		; (7/8 Cycles)      - Every 15 scanlines update PF1 and PF2
-    237  f0a8		       c6 8d		      dec	ARENACOUNTER	;     5      5      - Count down arena draw counter 
-    238  f0aa		       d0 12		      bne	.DECREMENT_SCANLINE	;     2/3    7/9    - Jump to sprite check if no arena update needed
-    239  f0ac				   .RST_ARENA_COUNTER		; (5 Cycles)	     - [UPDATE ARENA] Reset update counter
-    240  f0ac		       a9 0f		      lda	#15	;     2      9      - Reset Arena map update counter
-    241  f0ae		       85 8d		      sta	ARENACOUNTER	;     3     12      - Store the arena draw counter
-    242  f0b0				   .DRAW_ARENA		; (22 Cycles)	     - 
-    243  f0b0		       a6 8b		      ldx	ARENAINDEX	;     3     15      - Get the map data offset
-    244  f0b2		       bd 82 f3 	      lda	ARENA_0_PF1,x	;     4     19      - Load PF1
-    245  f0b5		       85 0e		      sta	PF1	;     3     22      - set PF1 slice
-    246  f0b7		       bd 8d f3 	      lda	ARENA_0_PF2,x	;     4     26      - Load PF2
-    247  f0ba		       85 0f		      sta	PF2	;     3     29      - Set PF2 slice
-    248  f0bc		       e6 8b		      inc	ARENAINDEX	;     5     34      - Move to next line of arena map data
-    249  f0be
-    250  f0be							;.INSIDE_P0:			  ; (13/14 Cycles)    - P0 Position draw check 
-    251  f0be							;     txa			   ;	 2     36      - Transfer X to A
-    252  f0be							;     sec			   ;	 2     38      - Set carry before subtraction
-    253  f0be							;     sbc P0POSY		   ;	 3     41      - Subtract sprite Y coord
-    254  f0be							;     cmp #PLAYER_HEIGHT	   ;	 2     43      - Current scanline inside p0 sprite bounds?
-    255  f0be							;     bcc .DRAWSPRP0		   ;	 2/3   45      - Draw P0 sprite routine
-    256  f0be							;     lda #0			   ;	 2     47      - else, index to 0
-    257  f0be							; .DRAWSPRP0:			   ; (23 Cycles)       - P0 Draw sprite slice
-    258  f0be							;     clc			   ;	 2     49      -  
-    259  f0be							;     adc P0ANMSET		   ;	 3     52      - Add animation frame offset ($0/$44)
-    260  f0be							;     tay			   ;	 2     54      - load Y so we can work with pointer
-    261  f0be							;     lda (P0SPRPTR),Y 	   ;	 5     59      - 
-    262  f0be							;     sta GRP0 		   ;	 3     62      - set graphics for player0
-    263  f0be							;     lda (P0COLPTR),Y 	   ;	 5     67      -
-    264  f0be							;     sta COLUP0		   ;	 3     70      - set color of player 0
+    235  f0a8				   .ARENA_COUNT_DOWN		; (7/8 Cycles)      - Every 15 scanlines update PF1 and PF2
+    236  f0a8		       c6 8d		      dec	ARENACOUNTER	;     5      5      - Count down arena draw counter 
+    237  f0aa		       d0 12		      bne	.DECREMENT_SCANLINE	;     2/3    7/9    - Jump to sprite check if no arena update needed
+    238  f0ac				   .RST_ARENA_COUNTER		; (5 Cycles)	     - [UPDATE ARENA] Reset update counter
+    239  f0ac		       a9 0f		      lda	#15	;     2      9      - Reset Arena map update counter
+    240  f0ae		       85 8d		      sta	ARENACOUNTER	;     3     12      - Store the arena draw counter
+    241  f0b0				   .DRAW_ARENA		; (22 Cycles)	     - 
+    242  f0b0		       a6 8b		      ldx	ARENAINDEX	;     3     15      - Get the map data offset
+    243  f0b2		       bd 7e f3 	      lda	ARENA_0_PF1,x	;     4     19      - Load PF1
+    244  f0b5		       85 0e		      sta	PF1	;     3     22      - set PF1 slice
+    245  f0b7		       bd 89 f3 	      lda	ARENA_0_PF2,x	;     4     26      - Load PF2
+    246  f0ba		       85 0f		      sta	PF2	;     3     29      - Set PF2 slice
+    247  f0bc		       e6 8b		      inc	ARENAINDEX	;     5     34      - Move to next line of arena map data
+    248  f0be
+    249  f0be							;.INSIDE_P0:			  ; (13/14 Cycles)    - P0 Position draw check 
+    250  f0be							;     txa			   ;	 2     36      - Transfer X to A
+    251  f0be							;     sec			   ;	 2     38      - Set carry before subtraction
+    252  f0be							;     sbc P0POSY		   ;	 3     41      - Subtract sprite Y coord
+    253  f0be							;     cmp #PLAYER_HEIGHT	   ;	 2     43      - Current scanline inside p0 sprite bounds?
+    254  f0be							;     bcc .DRAWSPRP0		   ;	 2/3   45      - Draw P0 sprite routine
+    255  f0be							;     lda #0			   ;	 2     47      - else, index to 0
+    256  f0be							; .DRAWSPRP0:			   ; (23 Cycles)       - P0 Draw sprite slice
+    257  f0be							;     clc			   ;	 2     49      -  
+    258  f0be							;     adc P0ANMSET		   ;	 3     52      - Add animation frame offset ($0/$44)
+    259  f0be							;     tay			   ;	 2     54      - load Y so we can work with pointer
+    260  f0be							;     lda (P0SPRPTR),Y 	   ;	 5     59      - 
+    261  f0be							;     sta GRP0 		   ;	 3     62      - set graphics for player0
+    262  f0be							;     lda (P0COLPTR),Y 	   ;	 5     67      -
+    263  f0be							;     sta COLUP0		   ;	 3     70      - set color of player 0
+    264  f0be
     265  f0be
-    266  f0be
-    267  f0be							; .INSIDE_BOMB:
-    268  f0be							;     txa
-    269  f0be							;     sec 
-    270  f0be							;     sbc #TEST_BOMB_Y
-    271  f0be							;     cmp #BOMB_HGT
-    272  f0be							;     bcc .DRAWBOMB
-    273  f0be							;     lda #0
-    274  f0be							; .DRAWBOMB
-    275  f0be							;     clc
-    276  f0be							;     tay 
-    277  f0be							;     lda (BOMB_SPRITE_PTR),Y
-    278  f0be							;     sta GRP1 
-    279  f0be							;     lda #$0
-    280  f0be							;     sta COLUP1
-    281  f0be
-    282  f0be				   .DECREMENT_SCANLINE		; (5 Cycles)	     - Decrement Scanline loop 
-    283  f0be		       88		      dey		;     2     72      - Reduce scanline counter (x)
-    284  f0bf		       d0 d8		      bne	.SLINE_LOOP	;     3     75      - repeat until screen is drawn
-    285  f0c1							;---------------------------------------------------- END OF GAME PLAY ZONE
+    266  f0be							; .INSIDE_BOMB:
+    267  f0be							;     txa
+    268  f0be							;     sec 
+    269  f0be							;     sbc #TEST_BOMB_Y
+    270  f0be							;     cmp #BOMB_HGT
+    271  f0be							;     bcc .DRAWBOMB
+    272  f0be							;     lda #0
+    273  f0be							; .DRAWBOMB
+    274  f0be							;     clc
+    275  f0be							;     tay 
+    276  f0be							;     lda (BOMB_SPRITE_PTR),Y
+    277  f0be							;     sta GRP1 
+    278  f0be							;     lda #$0
+    279  f0be							;     sta COLUP1
+    280  f0be
+    281  f0be				   .DECREMENT_SCANLINE		; (5 Cycles)	     - Decrement Scanline loop 
+    282  f0be		       88		      dey		;     2     72      - Reduce scanline counter (x)
+    283  f0bf		       d0 d8		      bne	.SLINE_LOOP	;     3     75      - repeat until screen is drawn
+    284  f0c1							;---------------------------------------------------- END OF GAME PLAY ZONE
+    285  f0c1
     286  f0c1
     287  f0c1
-    288  f0c1
-    289  f0c1				   .BOTTOM		;		     - [BOTTOM PANEL] Start of Bottom Panel
-    290  f0c1		       85 02		      sta	WSYNC	;-----3 ----78------- wait for scanline
-    291  f0c3		       a2 06		      ldx	#6	;     2	     - Bottom panel scanlines (6 for P0 color 19 for not)
-    292  f0c5		       a9 07		      lda	#$07	;     2	     - panel color
-    293  f0c7		       85 09		      sta	COLUBK	;     3	     - background
-    294  f0c9		       85 08		      sta	COLUPF	;     3	     - playfield set both the same to create border
-    295  f0cb				   BOTTOM_PANEL
-    296  f0cb		       85 02		      sta	WSYNC	;		     - wait for scanline
-    297  f0cd		       ca		      dex		;		     - X--
-    298  f0ce		       d0 fb		      bne	BOTTOM_PANEL	;		     - repeat until screen is drawn
-    299  f0d0							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    300  f0d0							;; OVERSCAN - 30 SCANLINES
-    301  f0d0							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    302  f0d0				   OVERSCAN
+    288  f0c1				   .BOTTOM		;		     - [BOTTOM PANEL] Start of Bottom Panel
+    289  f0c1		       85 02		      sta	WSYNC	;-----3 ----78------- wait for scanline
+    290  f0c3		       a2 06		      ldx	#6	;     2	     - Bottom panel scanlines (6 for P0 color 19 for not)
+    291  f0c5		       a9 07		      lda	#$07	;     2	     - panel color
+    292  f0c7		       85 09		      sta	COLUBK	;     3	     - background
+    293  f0c9		       85 08		      sta	COLUPF	;     3	     - playfield set both the same to create border
+    294  f0cb				   BOTTOM_PANEL
+    295  f0cb		       85 02		      sta	WSYNC	;		     - wait for scanline
+    296  f0cd		       ca		      dex		;		     - X--
+    297  f0ce		       d0 fb		      bne	BOTTOM_PANEL	;		     - repeat until screen is drawn
+    298  f0d0							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    299  f0d0							;; OVERSCAN - 30 SCANLINES
+    300  f0d0							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    301  f0d0				   OVERSCAN
       0  f0d0					      TIMER_SETUP	30
       1  f0d0				   .lines     SET	30
       2  f0d0		       a9 22		      lda	#(((.lines-1)*76-14)/64)
@@ -726,650 +725,652 @@
       1  f0d7				   .waittimer
       2  f0d7		       ad 84 02 	      lda	INTIM
       3  f0da		       d0 fb		      bne	.waittimer
-    305  f0dc
-    306  f0dc		       4c 12 f2 	      jmp	NEXTFRAME
-    307  f0df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    308  f0df							;; Process joystick input for player 0
-    309  f0df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    310  f0df							;; Movement is single direction (up, down, left OR right) If no direction is 
-    311  f0df							;; detected then the character gets reset to idle. This works by each direction 
-    312  f0df							;; branching to the next if not true, then right (last direction) falling 
-    313  f0df							;; through to a reset branch.
-    314  f0df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    315  f0df				   ProcessJoystick Subroutine
-    316  f0df		       a6 81		      ldx	P0POSY
-    317  f0e1							; Cycles    Total   - Comment
-    318  f0e1				   IPT_P0_UP
-    319  f0e1		       a9 10		      lda	#%00010000	;	2	 2   - UP
-    320  f0e3		       2c 80 02 	      bit	SWCHA	;	4	 6   - 
-    321  f0e6		       d0 44		      bne	IPT_P0_DN	;    2/3      8/9   - If not by pass UP logic
-    322  f0e8		       a9 00		      lda	#%00000000	;	2	10   - Reset sprite flip
-    323  f0ea		       85 0b		      sta	REFP0	;	3	13   - Set register
-    324  f0ec		       a9 22		      lda	#SPRITE_OFFSET_UP	;		     - Up Animation Frame base address
-    325  f0ee		       18		      clc		;		     - Clear the carry flag
-    326  f0ef		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
-    327  f0f1		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
-    328  f0f3
-    329  f0f3		       a4 80		      ldy	P0POSX
-    330  f0f5		       a9 0a		      lda	#Y_LANE_START	;		     - Sets A to the start of the map
-    331  f0f7				   .UP_NEXT_LANE		;		     -
-    332  f0f7		       69 10		      adc	#Y_LANE_UPDATE	;		     - Lane loop value
-    333  f0f9				   .UP_LOOP		;		     -
-    334  f0f9		       18		      clc		;		     -
-    335  f0fa		       c5 80		      cmp	P0POSX	;		     -
-    336  f0fc		       30 f9		      BMI	.UP_NEXT_LANE	;		     - Y is above A Lane so check Lane above
-    337  f0fe		       e9 05		      sbc	#Y_LANE_WALK_RIGHT	;		     - Walk up zone		
-    338  f100		       c5 80		      cmp	P0POSX	;		     - 
-    339  f102		       30 12		      BMI	.UP_WALK_RIGHT	;		     - Branch to walk up if Y is <
-    340  f104		       e9 05		      sbc	#Y_LANE_BLOCKED	;		     - Subtract to Blocked walk value
-    341  f106		       c5 80		      cmp	P0POSX	;		     - 
-    342  f108		       30 12		      BMI	.UP_DONT_MOVE	;		     - Branch to blocked walk if Y is <
-    343  f10a		       e9 05		      sbc	#Y_LANE_WALK_LEFT	;		     - Subtract to Walk down value
-    344  f10c		       c5 80		      cmp	P0POSX	;		     - 
-    345  f10e		       f0 0f		      BEQ	.UP_WALK	;		     - Branch to walk UP if Y = 
-    346  f110				   .UP_WALK_LEFT		;		     - 
-    347  f110		       88		      dey		;		     - 
-    348  f111		       84 80		      sty	P0POSX	;		     - 
-    349  f113		       4c 2b f1 	      jmp	.UP_RETURN	;		     - 
-    350  f116				   .UP_WALK_RIGHT		;		     -
-    351  f116		       c8		      iny		;		     - Move down 1
-    352  f117		       84 80		      sty	P0POSX	;		     - 
-    353  f119		       4c 2b f1 	      jmp	.UP_RETURN	;		     - 
-    354  f11c				   .UP_DONT_MOVE		;		     - 
-    355  f11c		       4c 2b f1 	      jmp	.UP_RETURN	;		     - 
-    356  f11f				   .UP_WALK		;		     - 
-    357  f11f		       e8		      inx		;		     - Move UP
-    358  f120				   .UP_EXIT		;		     - 
-    359  f120		       e0 98		      cpx	#UP_BOUNDS	;		     - Test new Y position against top of level
-    360  f122		       f0 07		      beq	.UP_RETURN	;		     - Skip storing update if out of bounds
-    361  f124		       e8		      inx		;		     - Move Up again (Aim to move up 2x in one update)
-    362  f125				   .UP_EXIT_2
-    363  f125		       e0 98		      cpx	#UP_BOUNDS	;		     - Test new Y position against top of level
-    364  f127		       f0 02		      beq	.UP_RETURN	;		     - Skip storing update if out of bounds
-    365  f129		       86 81		      stx	P0POSY	;		     - Store new X position
-    366  f12b				   .UP_RETURN		;		     - Don't add any more direction (We only support 4 direction movement)
-    367  f12b		       60		      rts
-    368  f12c				   IPT_P0_DN
-    369  f12c		       a9 20		      lda	#%00100000	;		     - DOWN
-    370  f12e		       2c 80 02 	      bit	SWCHA	;	4	 6   - 
-    371  f131		       d0 43		      bne	IPT_P0_LT	;		     - If not by pass DOWN logic
-    372  f133		       a9 11		      lda	#SPRITE_OFFSET_DOWN	;		     - Down Animation Frame base address
-    373  f135		       18		      clc		;		     - Clear the carry flag
-    374  f136		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
-    375  f138		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
-    376  f13a
-    377  f13a
-    378  f13a		       a4 80		      ldy	P0POSX
-    379  f13c		       a9 0a		      lda	#Y_LANE_START	;		     - Sets A to the start of the map
-    380  f13e				   .DN_NEXT_LANE		;		     -
-    381  f13e		       69 10		      adc	#Y_LANE_UPDATE	;		     - Lane loop value
-    382  f140				   .DN_LOOP		;		     -
-    383  f140		       18		      clc		;		     -
-    384  f141		       c5 80		      cmp	P0POSX	;		     -
-    385  f143		       30 f9		      BMI	.DN_NEXT_LANE	;		     - Y is above A Lane so check Lane above
-    386  f145		       e9 05		      sbc	#Y_LANE_WALK_RIGHT	;		     - Walk up zone		
-    387  f147		       c5 80		      cmp	P0POSX	;		     - 
-    388  f149		       30 12		      BMI	.DN_WALK_RIGHT	;		     - Branch to walk up if Y is <
-    389  f14b		       e9 05		      sbc	#Y_LANE_BLOCKED	;		     - Subtract to Blocked walk value
-    390  f14d		       c5 80		      cmp	P0POSX	;		     - 
-    391  f14f		       30 12		      BMI	.DN_DONT_MOVE	;		     - Branch to blocked walk if Y is <
-    392  f151		       e9 05		      sbc	#Y_LANE_WALK_LEFT	;		     - Subtract to Walk down value
-    393  f153		       c5 80		      cmp	P0POSX	;		     - 
-    394  f155		       f0 0f		      BEQ	.DN_WALK	;		     - Branch to walk DN if Y = 
-    395  f157				   .DN_WALK_LEFT		;		     - 
-    396  f157		       88		      dey		;		     - 
-    397  f158		       84 80		      sty	P0POSX	;		     - 
-    398  f15a		       4c 75 f1 	      jmp	.DN_RETURN	;		     - 
-    399  f15d				   .DN_WALK_RIGHT		;		     -
-    400  f15d		       c8		      iny		;		     - Move down 1
-    401  f15e		       84 80		      sty	P0POSX	;		     - 
-    402  f160		       4c 75 f1 	      jmp	.DN_RETURN	;		     - 
-    403  f163				   .DN_DONT_MOVE		;		     - 
-    404  f163		       4c 75 f1 	      jmp	.DN_RETURN	;		     - 
-    405  f166				   .DN_WALK		;		     - 
-    406  f166		       ca		      dex		;		     - Move DN
-    407  f167		       4c 6a f1 	      jmp	.DN_EXIT	;		     - 
-    408  f16a				   .DN_EXIT		;		     - 
-    409  f16a		       e0 00		      cpx	#DOWN_BOUNDS	;		     - Test new X position against DN of level
-    410  f16c		       f0 07		      beq	.DN_RETURN	;		     - Skip storing update if out of bounds
-    411  f16e		       ca		      dex
-    412  f16f				   .DN_EXIT_2
-    413  f16f		       e0 00		      cpx	#DOWN_BOUNDS	;		     - Test new X position against DN of level
-    414  f171		       f0 02		      beq	.DN_RETURN	;		     - Skip storing update if out of bounds    
-    415  f173		       86 81		      stx	P0POSY	;		     - Store new X position
-    416  f175				   .DN_RETURN		;		     - Don't add any more direction (We only support 4 direction movement)
-    417  f175		       60		      rts
-    418  f176				   IPT_P0_LT
-    419  f176		       a6 80		      ldx	P0POSX	;		     - Load Position X to X Register
-    420  f178		       a9 40		      lda	#%01000000	;		     - LEFT
-    421  f17a		       2c 80 02 	      bit	SWCHA	;	4	 6   - 
-    422  f17d		       d0 42		      bne	IPT_P0_RT	;		     - If not by pass LEFT logic
-    423  f17f		       a9 08		      lda	#%00001000	;		     - Flip sprite left
-    424  f181		       85 0b		      sta	REFP0	;		     - Set register
-    425  f183		       a9 33		      lda	#SPRITE_OFFSET_RIGHT	;		     - Right Animation Frame base address
-    426  f185		       18		      clc		;		     - Clear the carry flag
-    427  f186		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
-    428  f188		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
-    429  f18a
-    430  f18a							;; Lane Check Loop
-    431  f18a		       a4 81		      ldy	P0POSY
-    432  f18c		       a9 00		      lda	#0	;		     - Clears A so it can add lane loop value
-    433  f18e				   .LEFT_NEXT_LANE		;		     -
-    434  f18e		       69 1e		      adc	#X_LANE_START	;		     - Lane loop value
-    435  f190				   .LEFT_LOOP		;		     -
-    436  f190		       18		      clc		;		     -
-    437  f191		       c5 81		      cmp	P0POSY	;		     -
-    438  f193		       30 f9		      BMI	.LEFT_NEXT_LANE	;		     - Y is above A Lane so check Lane above
-    439  f195		       e9 07		      sbc	#X_LANE_WALK_UP	;		     - Walk up zone		
-    440  f197		       c5 81		      cmp	P0POSY	;		     - 
-    441  f199		       30 12		      BMI	.LEFT_WALK_UP	;		     - Branch to walk up if Y is <
-    442  f19b		       e9 07		      sbc	#X_LANE_BLOCKED	;		     - Subtract to Blocked walk value
-    443  f19d		       c5 81		      cmp	P0POSY	;		     - 
-    444  f19f		       30 12		      BMI	.LEFT_DONT_MOVE	;		     - Branch to blocked walk if Y is <
-    445  f1a1		       e9 0f		      sbc	#X_LANE_WALK_DOWN	;		     - Subtract to Walk down value
-    446  f1a3		       c5 81		      cmp	P0POSY	;		     - 
-    447  f1a5		       f0 0f		      BEQ	.LEFT_WALK	;		     - Branch to walk left if Y = 
-    448  f1a7				   .LEFT_WALK_DOWN		;		     -
-    449  f1a7		       88		      dey		;		     - Move down 1
-    450  f1a8		       84 81		      sty	P0POSY	;		     - 
-    451  f1aa		       4c c0 f1 	      jmp	.LEFT_RETURN	;		     - 
-    452  f1ad				   .LEFT_WALK_UP		;		     - 
-    453  f1ad		       c8		      iny		;		     - 
-    454  f1ae		       84 81		      sty	P0POSY	;		     - 
-    455  f1b0		       4c c0 f1 	      jmp	.LEFT_RETURN	;		     - 
-    456  f1b3				   .LEFT_DONT_MOVE		;		     - 
-    457  f1b3		       4c c0 f1 	      jmp	.LEFT_RETURN	;		     - 
-    458  f1b6				   .LEFT_WALK		;		     - 
-    459  f1b6		       ca		      dex		;		     - Move Left
-    460  f1b7		       4c ba f1 	      jmp	.LEFT_EXIT	;		     - 
-    461  f1ba				   .LEFT_EXIT		;		     - 
-    462  f1ba		       e0 0a		      cpx	#LEFT_BOUNDS	;		     - Test new X position against left of level
-    463  f1bc		       f0 02		      beq	.LEFT_RETURN	;		     - Skip storing update if out of bounds
-    464  f1be		       86 80		      stx	P0POSX	;		     - Store new X position
-    465  f1c0				   .LEFT_RETURN 		;		     - Don't add any more direction (We only support 4 direction movement)
-    466  f1c0		       60		      rts		;		     -
-    467  f1c1				   IPT_P0_RT
-    468  f1c1		       a9 80		      lda	#%10000000	;		     - RIGHT
-    469  f1c3		       2c 80 02 	      bit	SWCHA	;	4	 6   - 
-    470  f1c6		       d0 42		      bne	INP_P0_RST	;		     - If not by pass RIGHT logic
-    471  f1c8		       a9 00		      lda	#%00000000	;		     - Reset sprite flip
-    472  f1ca		       85 0b		      sta	REFP0	;		     - Set register
-    473  f1cc		       a9 33		      lda	#SPRITE_OFFSET_RIGHT	;		     - Right Animation Frame base address
-    474  f1ce		       18		      clc		;		     - Clear the carry flag
-    475  f1cf		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
-    476  f1d1		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
-    477  f1d3
-    478  f1d3							;; Lane Check Loop
-    479  f1d3		       a4 81		      ldy	P0POSY
-    480  f1d5		       a9 00		      lda	#0	;		     - Clears A so it can add lane loop value
-    481  f1d7				   .RIGHT_NEXT_LANE		;		     -
-    482  f1d7		       69 1e		      adc	#X_LANE_START	;		     - Lane loop value
-    483  f1d9				   .RIGHT_LOOP		;		     -
-    484  f1d9		       18		      clc		;		     -
-    485  f1da		       c5 81		      cmp	P0POSY	;		     -
-    486  f1dc		       30 f9		      BMI	.RIGHT_NEXT_LANE	;		     - Y is above A Lane so check Lane above
-    487  f1de		       e9 07		      sbc	#X_LANE_WALK_UP	;		     - Walk up zone		
-    488  f1e0		       c5 81		      cmp	P0POSY	;		     - 
-    489  f1e2		       30 12		      BMI	.RIGHT_WALK_UP	;		     - Branch to walk up if Y is <
-    490  f1e4		       e9 07		      sbc	#X_LANE_BLOCKED	;		     - Subtract to Blocked walk value
-    491  f1e6		       c5 81		      cmp	P0POSY	;		     - 
-    492  f1e8		       30 12		      BMI	.RIGHT_DONT_MOVE	;		     - Branch to blocked walk if Y is <
-    493  f1ea		       e9 0f		      sbc	#X_LANE_WALK_DOWN	;		     - Subtract to Walk down value
-    494  f1ec		       c5 81		      cmp	P0POSY	;		     - 
-    495  f1ee		       f0 0f		      BEQ	.RIGHT_WALK	;		     - Branch to walk RIGHT if Y = 
-    496  f1f0				   .RIGHT_WALK_DOWN		;		     -
-    497  f1f0		       88		      dey		;		     - Move down 1
-    498  f1f1		       84 81		      sty	P0POSY	;		     - 
-    499  f1f3		       4c 09 f2 	      jmp	.RIGHT_RETURN	;		     - 
-    500  f1f6				   .RIGHT_WALK_UP		;		     - 
-    501  f1f6		       c8		      iny		;		     - 
-    502  f1f7		       84 81		      sty	P0POSY	;		     - 
-    503  f1f9		       4c 09 f2 	      jmp	.RIGHT_RETURN	;		     - 
-    504  f1fc				   .RIGHT_DONT_MOVE		;		     - 
-    505  f1fc		       4c 09 f2 	      jmp	.RIGHT_RETURN	;		     - 
-    506  f1ff				   .RIGHT_WALK		;		     - 
-    507  f1ff		       e8		      inx		;		     - Move RIGHT
-    508  f200		       4c 03 f2 	      jmp	.RIGHT_EXIT	;		     - 
-    509  f203				   .RIGHT_EXIT		;		     - 
-    510  f203		       e0 6c		      cpx	#RIGHT_BOUNDS	;		     - Test new X position against RIGHT of level
-    511  f205		       f0 02		      beq	.RIGHT_RETURN	;		     - Skip storing update if out of bounds
-    512  f207		       86 80		      stx	P0POSX	;		     - Store new X position
-    513  f209				   .RIGHT_RETURN		;		     - Don't add any more direction (We only support 4 direction movement)
-    514  f209		       60		      rts		;		     -
-    515  f20a				   INP_P0_RST		;		     - Reset animation cause there was no input
-    516  f20a		       a9 00		      lda	#SPRITE_OFFSET_IDLE	;		     - Idle Animation Frame base address
-    517  f20c		       18		      clc		;		     - Clear the carry flag
-    518  f20d		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
-    519  f20f		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
-    520  f211				   IPT_P0_ND  Subroutine		;		     - End animation
-    521  f211		       60		      rts
-    522  f212							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    523  f212							;; Start next frame
-    524  f212							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    525  f212				   NEXTFRAME
-    526  f212		       4c 37 f0 	      jmp	STARTFRAME
-    527  f215							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    528  f215							;; Check for object collision
-    529  f215							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    530  f215
-    531  f215				   CKCOLP0PF  subroutine
-    532  f215		       a9 80		      lda	#%10000000	; CXP0FB bit 7 detects P0 and PF collision
-    533  f217		       24 02		      bit	CXP0FB	; Check CXP0FB with above pattern
-    534  f219		       d0 03		      bne	.COLP0PF	; if Collision P0 PF happened
-    535  f21b		       4c 1f f2 	      jmp	ENDCKCOL	; else, skip
-    536  f21e				   .COLP0PF
-    537  f21e		       60		      rts		; Go back to caller and they remove direction
-    538  f21f
-    539  f21f				   ENDCKCOL		; Fallback
-    540  f21f		       85 2c		      sta	CXCLR	; Reset Collision
-    541  f221		       4c 37 f0 	      jmp	STARTFRAME	; Didn't collide go to next frame
-    542  f224
-    543  f224							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    544  f224							;; Subroutine to handle object horizontal position with fine offset
-    545  f224							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    546  f224							;; A is target X-coord position
-    547  f224							;; Y is object (0: P0, 1: P1, 2: MISSILE0, 3: MISSILE1, 4: BALL)
-    548  f224							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    549  f224				   SETXPOS    Subroutine
-    550  f224		       85 02		      sta	WSYNC	; Start fresh scanline
-    551  f226		       85 2b		      sta	HMCLR	; clear old horizontal position values
-    552  f228		       38		      sec		; set carry flag before subtraction
-    553  f229				   .DIVIDE_LOOP
-    554  f229		       e9 0f		      sbc	#15	; A -= 15
-    555  f22b		       b0 fc		      bcs	.DIVIDE_LOOP	; Loop while carry flag is still set
-    556  f22d
-    557  f22d		       49 07		      eor	#7	; adjust remainder in A between -8 and 7
-    558  f22f		       0a		      asl		; shift left by 4 as HMP0 only uses 4 bits
-    559  f230		       0a		      asl
-    560  f231		       0a		      asl
-    561  f232		       0a		      asl
-    562  f233		       99 20 00 	      sta	HMP0,Y	; set the fine position
-    563  f236		       99 10 00 	      sta	RESP0,Y	; reset the 15-step rough position
-    564  f239		       85 02		      sta	WSYNC	;
-    565  f23b		       85 2a		      sta	HMOVE	; Apply fine position
-    566  f23d
-    567  f23d							; Prepare P0 Y for 2LK
-    568  f23d		       a2 01		      ldx	#1
-    569  f23f		       a5 81		      lda	P0POSY
-    570  f241		       18		      clc
-    571  f242		       69 01		      adc	#1
-    572  f244		       4a		      lsr
-    573  f245		       85 90		      sta	TEMP
-    574  f247
-    575  f247							; P0 Sprite Height in Arena
-    576  f247		       a9 b6		      lda	#(ARENA_HEIGHT + PLAYER_HEIGHT)
-    577  f249		       38		      sec
-    578  f24a		       e5 90		      sbc	TEMP
-    579  f24c		       85 87		      sta	P0DRAW
-    580  f24e
-    581  f24e							; P0 Sprite Pointer
-    582  f24e		       a9 6c		      lda	#<(IdleSprite + PLAYER_HEIGHT - 1)
-    583  f250		       38		      sec
-    584  f251		       e5 90		      sbc	TEMP
-    585  f253		       85 82		      sta	P0SPRPTR
-    586  f255		       a9 f2		      lda	#>(IdleSprite + PLAYER_HEIGHT - 1)
-    587  f257		       e9 00		      sbc	#0
-    588  f259		       85 83		      sta	P0SPRPTR+1
-    589  f25b
-    590  f25b
-    591  f25b
-    592  f25b		       60		      rts
-    593  f25c
-    594  f25c							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    595  f25c							;; Sprites
-    596  f25c							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    597  f25c				   IdleSprite
-    598  f25c		       00		      .byte.b	#%00000000	;$0E
-    599  f25d		       28		      .byte.b	#%00101000	;$58
-    600  f25e		       28		      .byte.b	#%00101000	;$58
-    601  f25f		       38		      .byte.b	#%00111000	;$0E
-    602  f260		       38		      .byte.b	#%00111000	;$9A
-    603  f261		       82		      .byte.b	#%10000010	;$42
-    604  f262		       ba		      .byte.b	#%10111010	;$02
-    605  f263		       fe		      .byte.b	#%11111110	;$9A
-    606  f264		       7c		      .byte.b	#%01111100	;$9A
-    607  f265		       38		      .byte.b	#%00111000	;$0E
-    608  f266		       7c		      .byte.b	#%01111100	;$58
-    609  f267		       44		      .byte.b	#%01000100	;$0E
-    610  f268		       44		      .byte.b	#%01000100	;$0E
-    611  f269		       7c		      .byte.b	#%01111100	;$58
-    612  f26a		       38		      .byte.b	#%00111000	;$0E
-    613  f26b		       0c		      .byte.b	#%00001100	;$58
-    614  f26c		       0c		      .byte.b	#%00001100	;$58
-    615  f26c		       00 11	   PLAYER_HEIGHT =	* - IdleSprite
-    616  f26d				   DownSprite
-    617  f26d		       00		      .byte.b	#%00000000	;$0E
-    618  f26e		       20		      .byte.b	#%00100000	;$58
-    619  f26f		       28		      .byte.b	#%00101000	;$58
-    620  f270		       38		      .byte.b	#%00111000	;$0E
-    621  f271		       38		      .byte.b	#%00111000	;$9A
-    622  f272		       02		      .byte.b	#%00000010	;$42
-    623  f273		       ba		      .byte.b	#%10111010	;$02
-    624  f274		       fe		      .byte.b	#%11111110	;$9A
-    625  f275		       7c		      .byte.b	#%01111100	;$9A
-    626  f276		       38		      .byte.b	#%00111000	;$0E
-    627  f277		       7c		      .byte.b	#%01111100	;$58
-    628  f278		       4c		      .byte.b	#%01001100	;$0E
-    629  f279		       4c		      .byte.b	#%01001100	;$0E
-    630  f27a		       7c		      .byte.b	#%01111100	;$58
-    631  f27b		       38		      .byte.b	#%00111000	;$0E
-    632  f27c		       0c		      .byte.b	#%00001100	;$58
-    633  f27d		       0c		      .byte.b	#%00001100	;$58
-    634  f27e				   UpSprite
-    635  f27e		       00		      .byte.b	#%00000000	;$0E
-    636  f27f		       20		      .byte.b	#%00100000	;$58
-    637  f280		       28		      .byte.b	#%00101000	;$58
-    638  f281		       38		      .byte.b	#%00111000	;$0E
-    639  f282		       38		      .byte.b	#%00111000	;$9A
-    640  f283		       02		      .byte.b	#%00000010	;$42
-    641  f284		       ba		      .byte.b	#%10111010	;$02
-    642  f285		       fe		      .byte.b	#%11111110	;$9A
-    643  f286		       7c		      .byte.b	#%01111100	;$9A
-    644  f287		       38		      .byte.b	#%00111000	;$0E
-    645  f288		       7c		      .byte.b	#%01111100	;$58
-    646  f289		       7c		      .byte.b	#%01111100	;$0E
-    647  f28a		       7c		      .byte.b	#%01111100	;$0E
-    648  f28b		       7c		      .byte.b	#%01111100	;$58
-    649  f28c		       38		      .byte.b	#%00111000	;$0E
-    650  f28d		       60		      .byte.b	#%01100000	;$58
-    651  f28e		       60		      .byte.b	#%01100000	;$58
-    652  f28f				   RightSprite
-    653  f28f		       00		      .byte.b	#%00000000	;$0E
-    654  f290		       4c		      .byte.b	#%01001100	;$58
-    655  f291		       68		      .byte.b	#%01101000	;$58
-    656  f292		       38		      .byte.b	#%00111000	;$0E
-    657  f293		       38		      .byte.b	#%00111000	;$9A
-    658  f294		       44		      .byte.b	#%01000100	;$42
-    659  f295		       78		      .byte.b	#%01111000	;$02
-    660  f296		       78		      .byte.b	#%01111000	;$9A
-    661  f297		       38		      .byte.b	#%00111000	;$9A
-    662  f298		       38		      .byte.b	#%00111000	;$0E
-    663  f299		       7c		      .byte.b	#%01111100	;$58
-    664  f29a		       60		      .byte.b	#%01100000	;$0E
-    665  f29b		       60		      .byte.b	#%01100000	;$0E
-    666  f29c		       7c		      .byte.b	#%01111100	;$58
-    667  f29d		       38		      .byte.b	#%00111000	;$0E
-    668  f29e		       30		      .byte.b	#%00110000	;$58
-    669  f29f		       30		      .byte.b	#%00110000	;$58
-    670  f2a0				   IdleSprite1
-    671  f2a0		       00		      .byte.b	#%00000000	;$0E
-    672  f2a1		       28		      .byte.b	#%00101000	;$58
-    673  f2a2		       28		      .byte.b	#%00101000	;$58
-    674  f2a3		       38		      .byte.b	#%00111000	;$0E
-    675  f2a4		       38		      .byte.b	#%00111000	;$9A
-    676  f2a5		       44		      .byte.b	#%01000100	;$42
-    677  f2a6		       ba		      .byte.b	#%10111010	;$02
-    678  f2a7		       fe		      .byte.b	#%11111110	;$9A
-    679  f2a8		       7c		      .byte.b	#%01111100	;$9A
-    680  f2a9		       38		      .byte.b	#%00111000	;$0E
-    681  f2aa		       7c		      .byte.b	#%01111100	;$58
-    682  f2ab		       44		      .byte.b	#%01000100	;$0E
-    683  f2ac		       44		      .byte.b	#%01000100	;$0E
-    684  f2ad		       7c		      .byte.b	#%01111100	;$58
-    685  f2ae		       38		      .byte.b	#%00111000	;$0E
-    686  f2af		       0c		      .byte.b	#%00001100	;$58
-    687  f2b0		       0c		      .byte.b	#%00001100	;$58
-    688  f2b1				   DownSprite1
-    689  f2b1		       00		      .byte.b	#%00000000	;$0E
-    690  f2b2		       08		      .byte.b	#%00001000	;$58
-    691  f2b3		       28		      .byte.b	#%00101000	;$58
-    692  f2b4		       38		      .byte.b	#%00111000	;$0E
-    693  f2b5		       38		      .byte.b	#%00111000	;$9A
-    694  f2b6		       80		      .byte.b	#%10000000	;$42
-    695  f2b7		       ba		      .byte.b	#%10111010	;$02
-    696  f2b8		       fe		      .byte.b	#%11111110	;$9A
-    697  f2b9		       7c		      .byte.b	#%01111100	;$9A
-    698  f2ba		       38		      .byte.b	#%00111000	;$0E
-    699  f2bb		       7c		      .byte.b	#%01111100	;$58
-    700  f2bc		       64		      .byte.b	#%01100100	;$0E
-    701  f2bd		       64		      .byte.b	#%01100100	;$0E
-    702  f2be		       7c		      .byte.b	#%01111100	;$58
-    703  f2bf		       38		      .byte.b	#%00111000	;$0E
-    704  f2c0		       60		      .byte.b	#%01100000	;$58
-    705  f2c1		       60		      .byte.b	#%01100000	;$58
-    706  f2c2				   UpSprite1
-    707  f2c2		       00		      .byte.b	#%00000000	;$0E
-    708  f2c3		       08		      .byte.b	#%00001000	;$58
-    709  f2c4		       28		      .byte.b	#%00101000	;$58
-    710  f2c5		       38		      .byte.b	#%00111000	;$0E
-    711  f2c6		       38		      .byte.b	#%00111000	;$9A
-    712  f2c7		       80		      .byte.b	#%10000000	;$42
-    713  f2c8		       ba		      .byte.b	#%10111010	;$02
-    714  f2c9		       fe		      .byte.b	#%11111110	;$9A
-    715  f2ca		       7c		      .byte.b	#%01111100	;$9A
-    716  f2cb		       38		      .byte.b	#%00111000	;$0E
-    717  f2cc		       7c		      .byte.b	#%01111100	;$58
-    718  f2cd		       7c		      .byte.b	#%01111100	;$0E
-    719  f2ce		       7c		      .byte.b	#%01111100	;$0E
-    720  f2cf		       7c		      .byte.b	#%01111100	;$58
-    721  f2d0		       38		      .byte.b	#%00111000	;$0E
-    722  f2d1		       0c		      .byte.b	#%00001100	;$58
-    723  f2d2		       0c		      .byte.b	#%00001100	;$58
-    724  f2d3				   RightSprite1
-    725  f2d3		       00		      .byte.b	#%00000000	;$0E
-    726  f2d4		       18		      .byte.b	#%00011000	;$58
-    727  f2d5		       30		      .byte.b	#%00110000	;$58
-    728  f2d6		       38		      .byte.b	#%00111000	;$0E
-    729  f2d7		       38		      .byte.b	#%00111000	;$9A
-    730  f2d8		       30		      .byte.b	#%00110000	;$42
-    731  f2d9		       38		      .byte.b	#%00111000	;$02
-    732  f2da		       38		      .byte.b	#%00111000	;$9A
-    733  f2db		       38		      .byte.b	#%00111000	;$9A
-    734  f2dc		       38		      .byte.b	#%00111000	;$0E
-    735  f2dd		       7c		      .byte.b	#%01111100	;$58
-    736  f2de		       70		      .byte.b	#%01110000	;$0E
-    737  f2df		       70		      .byte.b	#%01110000	;$0E
-    738  f2e0		       7c		      .byte.b	#%01111100	;$58
-    739  f2e1		       38		      .byte.b	#%00111000	;$0E
-    740  f2e2		       60		      .byte.b	#%01100000	;$58
-    741  f2e3		       60		      .byte.b	#%01100000	;$58  
-    742  f2e4							;---End Graphics Data---
-    743  f2e4
-    744  f2e4				   Bomb0
-    745  f2e4		       00		      .byte.b	#%00000000	;$0E
-    746  f2e5		       18		      .byte.b	#%00011000	;$0E
-    747  f2e6		       3c		      .byte.b	#%00111100	;$0E
-    748  f2e7		       3c		      .byte.b	#%00111100	;$0E
-    749  f2e8		       3c		      .byte.b	#%00111100	;$0E
-    750  f2e9		       3c		      .byte.b	#%00111100	;$0E
-    751  f2ea		       18		      .byte.b	#%00011000	;$0E
-    752  f2eb		       0a		      .byte.b	#%00001010	;$1C
-    753  f2ec		       04		      .byte.b	#%00000100	;$1C
-    754  f2ed
-    755  f2ed							;---Color Data from PlayerPal 2600---
-    756  f2ed				   ColorFrame0
-    757  f2ed		       0e		      .byte.b	#$0E	;
-    758  f2ee		       58		      .byte.b	#$58	;
-    759  f2ef		       58		      .byte.b	#$58	;
-    760  f2f0		       0e		      .byte.b	#$0E	;
-    761  f2f1		       9a		      .byte.b	#$9A	;
-    762  f2f2		       42		      .byte.b	#$42	;
-    763  f2f3		       02		      .byte.b	#$02	;
-    764  f2f4		       9a		      .byte.b	#$9A	;
-    765  f2f5		       9a		      .byte.b	#$9A	;
-    766  f2f6		       0e		      .byte.b	#$0E	;
-    767  f2f7		       58		      .byte.b	#$58	;
-    768  f2f8		       0e		      .byte.b	#$0E	;
-    769  f2f9		       0e		      .byte.b	#$0E	;
-    770  f2fa		       58		      .byte.b	#$58	;
-    771  f2fb		       0e		      .byte.b	#$0E	;
-    772  f2fc		       58		      .byte.b	#$58	;
-    773  f2fd		       58		      .byte.b	#$58	;
-    774  f2fe				   ColorFrame1
-    775  f2fe		       0e		      .byte.b	#$0E	;
-    776  f2ff		       58		      .byte.b	#$58	;
-    777  f300		       58		      .byte.b	#$58	;
-    778  f301		       0e		      .byte.b	#$0E	;
-    779  f302		       9a		      .byte.b	#$9A	;
-    780  f303		       42		      .byte.b	#$42	;
-    781  f304		       02		      .byte.b	#$02	;
-    782  f305		       9a		      .byte.b	#$9A	;
-    783  f306		       9a		      .byte.b	#$9A	;
-    784  f307		       0e		      .byte.b	#$0E	;
-    785  f308		       58		      .byte.b	#$58	;
-    786  f309		       0e		      .byte.b	#$0E	;
-    787  f30a		       0e		      .byte.b	#$0E	;
-    788  f30b		       58		      .byte.b	#$58	;
-    789  f30c		       0e		      .byte.b	#$0E	;
-    790  f30d		       58		      .byte.b	#$58	;
-    791  f30e		       58		      .byte.b	#$58	;
-    792  f30f				   ColorFrame2
-    793  f30f		       0e		      .byte.b	#$0E	;
-    794  f310		       58		      .byte.b	#$58	;
-    795  f311		       58		      .byte.b	#$58	;
-    796  f312		       0e		      .byte.b	#$0E	;
-    797  f313		       9a		      .byte.b	#$9A	;
-    798  f314		       42		      .byte.b	#$42	;
-    799  f315		       02		      .byte.b	#$02	;
-    800  f316		       9a		      .byte.b	#$9A	;
-    801  f317		       9a		      .byte.b	#$9A	;
-    802  f318		       0e		      .byte.b	#$0E	;
-    803  f319		       58		      .byte.b	#$58	;
-    804  f31a		       0e		      .byte.b	#$0E	;
-    805  f31b		       0e		      .byte.b	#$0E	;
-    806  f31c		       58		      .byte.b	#$58	;
-    807  f31d		       0e		      .byte.b	#$0E	;
-    808  f31e		       58		      .byte.b	#$58	;
-    809  f31f		       58		      .byte.b	#$58	;
-    810  f320				   ColorFrame3
-    811  f320		       0e		      .byte.b	#$0E	;
-    812  f321		       58		      .byte.b	#$58	;
-    813  f322		       58		      .byte.b	#$58	;
-    814  f323		       0e		      .byte.b	#$0E	;
-    815  f324		       9a		      .byte.b	#$9A	;
-    816  f325		       42		      .byte.b	#$42	;
-    817  f326		       02		      .byte.b	#$02	;
-    818  f327		       9a		      .byte.b	#$9A	;
-    819  f328		       9a		      .byte.b	#$9A	;
-    820  f329		       0e		      .byte.b	#$0E	;
-    821  f32a		       58		      .byte.b	#$58	;
-    822  f32b		       0e		      .byte.b	#$0E	;
-    823  f32c		       0e		      .byte.b	#$0E	;
-    824  f32d		       58		      .byte.b	#$58	;
-    825  f32e		       0e		      .byte.b	#$0E	;
-    826  f32f		       58		      .byte.b	#$58	;
-    827  f330		       58		      .byte.b	#$58	;
-    828  f331				   ColorFrame4
-    829  f331		       0e		      .byte.b	#$0E	;
-    830  f332		       58		      .byte.b	#$58	;
-    831  f333		       58		      .byte.b	#$58	;
-    832  f334		       0e		      .byte.b	#$0E	;
-    833  f335		       9a		      .byte.b	#$9A	;
-    834  f336		       42		      .byte.b	#$42	;
-    835  f337		       02		      .byte.b	#$02	;
-    836  f338		       9a		      .byte.b	#$9A	;
-    837  f339		       9a		      .byte.b	#$9A	;
-    838  f33a		       0e		      .byte.b	#$0E	;
-    839  f33b		       58		      .byte.b	#$58	;
-    840  f33c		       0e		      .byte.b	#$0E	;
-    841  f33d		       0e		      .byte.b	#$0E	;
-    842  f33e		       58		      .byte.b	#$58	;
-    843  f33f		       0e		      .byte.b	#$0E	;
-    844  f340		       58		      .byte.b	#$58	;
-    845  f341		       58		      .byte.b	#$58	;
-    846  f342				   ColorFrame5
-    847  f342		       0e		      .byte.b	#$0E	;
-    848  f343		       58		      .byte.b	#$58	;
-    849  f344		       58		      .byte.b	#$58	;
-    850  f345		       0e		      .byte.b	#$0E	;
-    851  f346		       9a		      .byte.b	#$9A	;
-    852  f347		       42		      .byte.b	#$42	;
-    853  f348		       02		      .byte.b	#$02	;
-    854  f349		       9a		      .byte.b	#$9A	;
-    855  f34a		       9a		      .byte.b	#$9A	;
-    856  f34b		       0e		      .byte.b	#$0E	;
-    857  f34c		       58		      .byte.b	#$58	;
-    858  f34d		       0e		      .byte.b	#$0E	;
-    859  f34e		       0e		      .byte.b	#$0E	;
-    860  f34f		       58		      .byte.b	#$58	;
-    861  f350		       0e		      .byte.b	#$0E	;
-    862  f351		       58		      .byte.b	#$58	;
-    863  f352		       58		      .byte.b	#$58	;
-    864  f353				   ColorFrame6
-    865  f353		       0e		      .byte.b	#$0E	;
-    866  f354		       58		      .byte.b	#$58	;
-    867  f355		       58		      .byte.b	#$58	;
-    868  f356		       0e		      .byte.b	#$0E	;
-    869  f357		       9a		      .byte.b	#$9A	;
-    870  f358		       42		      .byte.b	#$42	;
-    871  f359		       02		      .byte.b	#$02	;
-    872  f35a		       9a		      .byte.b	#$9A	;
-    873  f35b		       9a		      .byte.b	#$9A	;
-    874  f35c		       0e		      .byte.b	#$0E	;
-    875  f35d		       58		      .byte.b	#$58	;
-    876  f35e		       0e		      .byte.b	#$0E	;
-    877  f35f		       0e		      .byte.b	#$0E	;
-    878  f360		       58		      .byte.b	#$58	;
-    879  f361		       0e		      .byte.b	#$0E	;
-    880  f362		       58		      .byte.b	#$58	;
-    881  f363		       58		      .byte.b	#$58	;
-    882  f364				   ColorFrame7
-    883  f364		       0e		      .byte.b	#$0E	;
-    884  f365		       58		      .byte.b	#$58	;
-    885  f366		       58		      .byte.b	#$58	;
-    886  f367		       0e		      .byte.b	#$0E	;
-    887  f368		       9a		      .byte.b	#$9A	;
-    888  f369		       42		      .byte.b	#$42	;
-    889  f36a		       02		      .byte.b	#$02	;
-    890  f36b		       9a		      .byte.b	#$9A	;
-    891  f36c		       9a		      .byte.b	#$9A	;
-    892  f36d		       0e		      .byte.b	#$0E	;
-    893  f36e		       58		      .byte.b	#$58	;
-    894  f36f		       0e		      .byte.b	#$0E	;
-    895  f370		       0e		      .byte.b	#$0E	;
-    896  f371		       58		      .byte.b	#$58	;
-    897  f372		       0e		      .byte.b	#$0E	;
-    898  f373		       58		      .byte.b	#$58	;
-    899  f374		       58		      .byte.b	#$58	;     
-    900  f375							;---End Color Data---
-    901  f375							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    902  f375							;; Arena
-    903  f375							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    904  f375				   ARENA_0_PF0
-    905  f375		       f0		      .byte.b	%11110000
-    906  f376		       10		      .byte.b	%00010000
-    907  f377		       50		      .byte.b	%01010000
-    908  f378		       10		      .byte.b	%00010000
-    909  f379		       50		      .byte.b	%01010000
-    910  f37a		       10		      .byte.b	%00010000
-    911  f37b		       50		      .byte.b	%01010000
-    912  f37c		       10		      .byte.b	%00010000
-    913  f37d		       50		      .byte.b	%01010000
-    914  f37e		       10		      .byte.b	%00010000
-    915  f37f		       50		      .byte.b	%01010000
-    916  f380		       10		      .byte.b	%00010000
-    917  f381		       f0		      .byte.b	%11110000
-    918  f382
-    919  f382				   ARENA_0_PF1
-    920  f382		       e0		      .byte.b	%11100000
-    921  f383		       e6		      .byte.b	%11100110
-    922  f384		       e0		      .byte.b	%11100000
-    923  f385		       e6		      .byte.b	%11100110
-    924  f386		       e0		      .byte.b	%11100000
-    925  f387		       e6		      .byte.b	%11100110
-    926  f388		       e0		      .byte.b	%11100000
-    927  f389		       e6		      .byte.b	%11100110
-    928  f38a		       e0		      .byte.b	%11100000
-    929  f38b		       e6		      .byte.b	%11100110
-    930  f38c		       e0		      .byte.b	%11100000
-    931  f38d
-    932  f38d				   ARENA_0_PF2
-    933  f38d		       00		      .byte.b	%00000000
-    934  f38e		       66		      .byte.b	%01100110
-    935  f38f		       00		      .byte.b	%00000000
-    936  f390		       66		      .byte.b	%01100110
-    937  f391		       00		      .byte.b	%00000000
-    938  f392		       66		      .byte.b	%01100110
-    939  f393		       00		      .byte.b	%00000000
-    940  f394		       66		      .byte.b	%01100110
-    941  f395		       00		      .byte.b	%00000000
-    942  f396		       66		      .byte.b	%01100110
-    943  f397		       00		      .byte.b	%00000000
-    944  f398
-    945  f398
-    946  f398							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    947  f398							;; Complete ROM size
-    948  f398							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    949  fffc					      org	$FFFC	; Move to position $FFFC
-    950  fffc		       00 f0		      .word.w	RESET	; Write 2 bytes with reset address
-    951  fffe		       00 f0		      .word.w	RESET	; Write 2 bytes with interruption vector
+    304  f0dc
+    305  f0dc		       4c 46 f2 	      jmp	NEXTFRAME
+    306  f0df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    307  f0df							;; Subroutine to handle object horizontal position with fine offset
+    308  f0df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    309  f0df							;; A is target X-coord position
+    310  f0df							;; Y is object (0: P0, 1: P1, 2: MISSILE0, 3: MISSILE1, 4: BALL)
+    311  f0df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    312  f0df				   SETXPOS    Subroutine
+    313  f0df		       85 02		      sta	WSYNC	; Start fresh scanline
+    314  f0e1		       85 2b		      sta	HMCLR	; clear old horizontal position values
+    315  f0e3		       38		      sec		; set carry flag before subtraction
+    316  f0e4				   .DIVIDE_LOOP
+    317  f0e4		       e9 0f		      sbc	#15	; A -= 15
+    318  f0e6		       b0 fc		      bcs	.DIVIDE_LOOP	; Loop while carry flag is still set
+    319  f0e8
+    320  f0e8		       49 07		      eor	#7	; adjust remainder in A between -8 and 7
+    321  f0ea		       0a		      asl		; shift left by 4 as HMP0 only uses 4 bits
+    322  f0eb		       0a		      asl
+    323  f0ec		       0a		      asl
+    324  f0ed		       0a		      asl
+    325  f0ee		       99 20 00 	      sta	HMP0,Y	; set the fine position
+    326  f0f1		       99 10 00 	      sta	RESP0,Y	; reset the 15-step rough position
+    327  f0f4		       85 02		      sta	WSYNC	;
+    328  f0f6		       85 2a		      sta	HMOVE	; Apply fine position
+    329  f0f8
+    330  f0f8							; Prepare P0 Y for 2LK
+    331  f0f8		       a2 01		      ldx	#1	; preload X for setting VDELPx
+    332  f0fa		       a5 81		      lda	P0POSY	; get the P0 Y position
+    333  f0fc							;clc			      ;
+    334  f0fc							;adc #1		      ; add 1 to compensate for priming of GRP0 
+    335  f0fc							; Removed the divide, not sure how to incorporate it into the code
+    336  f0fc							;lsr			      ; divide by 2 for the 2LK position
+    337  f0fc		       85 90		      sta	TEMP	; save for position calculations
+    338  f0fe
+    339  f0fe							; P0 Sprite Height in Arena
+    340  f0fe							; P0DRAW = ARENA_HEIGHT + PLAYER_HEIGHT - P0POSY + 1
+    341  f0fe		       a9 b6		      lda	#(ARENA_HEIGHT + PLAYER_HEIGHT)
+    342  f100		       38		      sec
+    343  f101		       e5 81		      sbc	P0POSY
+    344  f103		       85 87		      sta	P0DRAW
+    345  f105
+    346  f105							; P0 Sprite Pointer
+    347  f105		       a9 68		      lda	#<(#IdleSprite + PLAYER_HEIGHT - 1)
+    348  f107		       38		      sec
+    349  f108		       e5 90		      sbc	TEMP
+    350  f10a		       85 82		      sta	P0SPRPTR
+    351  f10c		       a9 f2		      lda	#>(#IdleSprite + PLAYER_HEIGHT - 1)
+    352  f10e		       e9 00		      sbc	#0
+    353  f110		       85 83		      sta	P0SPRPTR+1
+    354  f112
+    355  f112		       60		      rts
+    356  f113							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    357  f113							;; Process joystick input for player 0
+    358  f113							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    359  f113							;; Movement is single direction (up, down, left OR right) If no direction is 
+    360  f113							;; detected then the character gets reset to idle. This works by each direction 
+    361  f113							;; branching to the next if not true, then right (last direction) falling 
+    362  f113							;; through to a reset branch.
+    363  f113							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    364  f113				   ProcessJoystick Subroutine
+    365  f113		       a6 81		      ldx	P0POSY
+    366  f115							; Cycles    Total   - Comment
+    367  f115				   IPT_P0_UP
+    368  f115		       a9 10		      lda	#%00010000	;	2	 2   - UP
+    369  f117		       2c 80 02 	      bit	SWCHA	;	4	 6   - 
+    370  f11a		       d0 44		      bne	IPT_P0_DN	;    2/3      8/9   - If not by pass UP logic
+    371  f11c		       a9 00		      lda	#%00000000	;	2	10   - Reset sprite flip
+    372  f11e		       85 0b		      sta	REFP0	;	3	13   - Set register
+    373  f120		       a9 22		      lda	#SPRITE_OFFSET_UP	;		     - Up Animation Frame base address
+    374  f122		       18		      clc		;		     - Clear the carry flag
+    375  f123		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
+    376  f125		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
+    377  f127
+    378  f127		       a4 80		      ldy	P0POSX
+    379  f129		       a9 0a		      lda	#Y_LANE_START	;		     - Sets A to the start of the map
+    380  f12b				   .UP_NEXT_LANE		;		     -
+    381  f12b		       69 10		      adc	#Y_LANE_UPDATE	;		     - Lane loop value
+    382  f12d				   .UP_LOOP		;		     -
+    383  f12d		       18		      clc		;		     -
+    384  f12e		       c5 80		      cmp	P0POSX	;		     -
+    385  f130		       30 f9		      BMI	.UP_NEXT_LANE	;		     - Y is above A Lane so check Lane above
+    386  f132		       e9 05		      sbc	#Y_LANE_WALK_RIGHT	;		     - Walk up zone		
+    387  f134		       c5 80		      cmp	P0POSX	;		     - 
+    388  f136		       30 12		      BMI	.UP_WALK_RIGHT	;		     - Branch to walk up if Y is <
+    389  f138		       e9 05		      sbc	#Y_LANE_BLOCKED	;		     - Subtract to Blocked walk value
+    390  f13a		       c5 80		      cmp	P0POSX	;		     - 
+    391  f13c		       30 12		      BMI	.UP_DONT_MOVE	;		     - Branch to blocked walk if Y is <
+    392  f13e		       e9 05		      sbc	#Y_LANE_WALK_LEFT	;		     - Subtract to Walk down value
+    393  f140		       c5 80		      cmp	P0POSX	;		     - 
+    394  f142		       f0 0f		      BEQ	.UP_WALK	;		     - Branch to walk UP if Y = 
+    395  f144				   .UP_WALK_LEFT		;		     - 
+    396  f144		       88		      dey		;		     - 
+    397  f145		       84 80		      sty	P0POSX	;		     - 
+    398  f147		       4c 5f f1 	      jmp	.UP_RETURN	;		     - 
+    399  f14a				   .UP_WALK_RIGHT		;		     -
+    400  f14a		       c8		      iny		;		     - Move down 1
+    401  f14b		       84 80		      sty	P0POSX	;		     - 
+    402  f14d		       4c 5f f1 	      jmp	.UP_RETURN	;		     - 
+    403  f150				   .UP_DONT_MOVE		;		     - 
+    404  f150		       4c 5f f1 	      jmp	.UP_RETURN	;		     - 
+    405  f153				   .UP_WALK		;		     - 
+    406  f153		       e8		      inx		;		     - Move UP
+    407  f154				   .UP_EXIT		;		     - 
+    408  f154		       e0 a8		      cpx	#UP_BOUNDS	;		     - Test new Y position against top of level
+    409  f156		       f0 07		      beq	.UP_RETURN	;		     - Skip storing update if out of bounds
+    410  f158		       e8		      inx		;		     - Move Up again (Aim to move up 2x in one update)
+    411  f159				   .UP_EXIT_2
+    412  f159		       e0 a8		      cpx	#UP_BOUNDS	;		     - Test new Y position against top of level
+    413  f15b		       f0 02		      beq	.UP_RETURN	;		     - Skip storing update if out of bounds
+    414  f15d		       86 81		      stx	P0POSY	;		     - Store new X position
+    415  f15f				   .UP_RETURN		;		     - Don't add any more direction (We only support 4 direction movement)
+    416  f15f		       60		      rts
+    417  f160				   IPT_P0_DN
+    418  f160		       a9 20		      lda	#%00100000	;		     - DOWN
+    419  f162		       2c 80 02 	      bit	SWCHA	;	4	 6   - 
+    420  f165		       d0 43		      bne	IPT_P0_LT	;		     - If not by pass DOWN logic
+    421  f167		       a9 11		      lda	#SPRITE_OFFSET_DOWN	;		     - Down Animation Frame base address
+    422  f169		       18		      clc		;		     - Clear the carry flag
+    423  f16a		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
+    424  f16c		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
+    425  f16e
+    426  f16e
+    427  f16e		       a4 80		      ldy	P0POSX
+    428  f170		       a9 0a		      lda	#Y_LANE_START	;		     - Sets A to the start of the map
+    429  f172				   .DN_NEXT_LANE		;		     -
+    430  f172		       69 10		      adc	#Y_LANE_UPDATE	;		     - Lane loop value
+    431  f174				   .DN_LOOP		;		     -
+    432  f174		       18		      clc		;		     -
+    433  f175		       c5 80		      cmp	P0POSX	;		     -
+    434  f177		       30 f9		      BMI	.DN_NEXT_LANE	;		     - Y is above A Lane so check Lane above
+    435  f179		       e9 05		      sbc	#Y_LANE_WALK_RIGHT	;		     - Walk up zone		
+    436  f17b		       c5 80		      cmp	P0POSX	;		     - 
+    437  f17d		       30 12		      BMI	.DN_WALK_RIGHT	;		     - Branch to walk up if Y is <
+    438  f17f		       e9 05		      sbc	#Y_LANE_BLOCKED	;		     - Subtract to Blocked walk value
+    439  f181		       c5 80		      cmp	P0POSX	;		     - 
+    440  f183		       30 12		      BMI	.DN_DONT_MOVE	;		     - Branch to blocked walk if Y is <
+    441  f185		       e9 05		      sbc	#Y_LANE_WALK_LEFT	;		     - Subtract to Walk down value
+    442  f187		       c5 80		      cmp	P0POSX	;		     - 
+    443  f189		       f0 0f		      BEQ	.DN_WALK	;		     - Branch to walk DN if Y = 
+    444  f18b				   .DN_WALK_LEFT		;		     - 
+    445  f18b		       88		      dey		;		     - 
+    446  f18c		       84 80		      sty	P0POSX	;		     - 
+    447  f18e		       4c a9 f1 	      jmp	.DN_RETURN	;		     - 
+    448  f191				   .DN_WALK_RIGHT		;		     -
+    449  f191		       c8		      iny		;		     - Move down 1
+    450  f192		       84 80		      sty	P0POSX	;		     - 
+    451  f194		       4c a9 f1 	      jmp	.DN_RETURN	;		     - 
+    452  f197				   .DN_DONT_MOVE		;		     - 
+    453  f197		       4c a9 f1 	      jmp	.DN_RETURN	;		     - 
+    454  f19a				   .DN_WALK		;		     - 
+    455  f19a		       ca		      dex		;		     - Move DN
+    456  f19b		       4c 9e f1 	      jmp	.DN_EXIT	;		     - 
+    457  f19e				   .DN_EXIT		;		     - 
+    458  f19e		       e0 10		      cpx	#DOWN_BOUNDS	;		     - Test new X position against DN of level
+    459  f1a0		       f0 07		      beq	.DN_RETURN	;		     - Skip storing update if out of bounds
+    460  f1a2		       ca		      dex
+    461  f1a3				   .DN_EXIT_2
+    462  f1a3		       e0 10		      cpx	#DOWN_BOUNDS	;		     - Test new X position against DN of level
+    463  f1a5		       f0 02		      beq	.DN_RETURN	;		     - Skip storing update if out of bounds    
+    464  f1a7		       86 81		      stx	P0POSY	;		     - Store new X position
+    465  f1a9				   .DN_RETURN		;		     - Don't add any more direction (We only support 4 direction movement)
+    466  f1a9		       60		      rts
+    467  f1aa				   IPT_P0_LT
+    468  f1aa		       a6 80		      ldx	P0POSX	;		     - Load Position X to X Register
+    469  f1ac		       a9 40		      lda	#%01000000	;		     - LEFT
+    470  f1ae		       2c 80 02 	      bit	SWCHA	;	4	 6   - 
+    471  f1b1		       d0 42		      bne	IPT_P0_RT	;		     - If not by pass LEFT logic
+    472  f1b3		       a9 08		      lda	#%00001000	;		     - Flip sprite left
+    473  f1b5		       85 0b		      sta	REFP0	;		     - Set register
+    474  f1b7		       a9 33		      lda	#SPRITE_OFFSET_RIGHT	;		     - Right Animation Frame base address
+    475  f1b9		       18		      clc		;		     - Clear the carry flag
+    476  f1ba		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
+    477  f1bc		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
+    478  f1be
+    479  f1be							;; Lane Check Loop
+    480  f1be		       a4 81		      ldy	P0POSY
+    481  f1c0		       a9 10		      lda	#X_LANE_START	;		     - Sets a to bottom bounds
+    482  f1c2				   .LEFT_NEXT_LANE		;		     -
+    483  f1c2		       69 1e		      adc	#X_LANE_UPDATE	;		     - Lane loop value
+    484  f1c4				   .LEFT_LOOP		;		     -
+    485  f1c4		       18		      clc		;		     -
+    486  f1c5		       c5 81		      cmp	P0POSY	;		     -
+    487  f1c7		       30 f9		      BMI	.LEFT_NEXT_LANE	;		     - Y is above A Lane so check Lane above
+    488  f1c9		       e9 07		      sbc	#X_LANE_WALK_UP	;		     - Walk up zone		
+    489  f1cb		       c5 81		      cmp	P0POSY	;		     - 
+    490  f1cd		       30 12		      BMI	.LEFT_WALK_UP	;		     - Branch to walk up if Y is <
+    491  f1cf		       e9 07		      sbc	#X_LANE_BLOCKED	;		     - Subtract to Blocked walk value
+    492  f1d1		       c5 81		      cmp	P0POSY	;		     - 
+    493  f1d3		       30 12		      BMI	.LEFT_DONT_MOVE	;		     - Branch to blocked walk if Y is <
+    494  f1d5		       e9 0f		      sbc	#X_LANE_WALK_DOWN	;		     - Subtract to Walk down value
+    495  f1d7		       c5 81		      cmp	P0POSY	;		     - 
+    496  f1d9		       f0 0f		      BEQ	.LEFT_WALK	;		     - Branch to walk left if Y = 
+    497  f1db				   .LEFT_WALK_DOWN		;		     -
+    498  f1db		       88		      dey		;		     - Move down 1
+    499  f1dc		       84 81		      sty	P0POSY	;		     - 
+    500  f1de		       4c f4 f1 	      jmp	.LEFT_RETURN	;		     - 
+    501  f1e1				   .LEFT_WALK_UP		;		     - 
+    502  f1e1		       c8		      iny		;		     - 
+    503  f1e2		       84 81		      sty	P0POSY	;		     - 
+    504  f1e4		       4c f4 f1 	      jmp	.LEFT_RETURN	;		     - 
+    505  f1e7				   .LEFT_DONT_MOVE		;		     - 
+    506  f1e7		       4c f4 f1 	      jmp	.LEFT_RETURN	;		     - 
+    507  f1ea				   .LEFT_WALK		;		     - 
+    508  f1ea		       ca		      dex		;		     - Move Left
+    509  f1eb		       4c ee f1 	      jmp	.LEFT_EXIT	;		     - 
+    510  f1ee				   .LEFT_EXIT		;		     - 
+    511  f1ee		       e0 0a		      cpx	#LEFT_BOUNDS	;		     - Test new X position against left of level
+    512  f1f0		       f0 02		      beq	.LEFT_RETURN	;		     - Skip storing update if out of bounds
+    513  f1f2		       86 80		      stx	P0POSX	;		     - Store new X position
+    514  f1f4				   .LEFT_RETURN 		;		     - Don't add any more direction (We only support 4 direction movement)
+    515  f1f4		       60		      rts		;		     -
+    516  f1f5				   IPT_P0_RT
+    517  f1f5		       a9 80		      lda	#%10000000	;		     - RIGHT
+    518  f1f7		       2c 80 02 	      bit	SWCHA	;	4	 6   - 
+    519  f1fa		       d0 42		      bne	INP_P0_RST	;		     - If not by pass RIGHT logic
+    520  f1fc		       a9 00		      lda	#%00000000	;		     - Reset sprite flip
+    521  f1fe		       85 0b		      sta	REFP0	;		     - Set register
+    522  f200		       a9 33		      lda	#SPRITE_OFFSET_RIGHT	;		     - Right Animation Frame base address
+    523  f202		       18		      clc		;		     - Clear the carry flag
+    524  f203		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
+    525  f205		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
+    526  f207
+    527  f207							;; Lane Check Loop
+    528  f207		       a4 81		      ldy	P0POSY
+    529  f209		       a9 10		      lda	#X_LANE_START	;		     - Sets a to bottom bounds
+    530  f20b				   .RIGHT_NEXT_LANE		;		     -
+    531  f20b		       69 1e		      adc	#X_LANE_UPDATE	;		     - Lane loop value
+    532  f20d				   .RIGHT_LOOP		;		     -
+    533  f20d		       18		      clc		;		     -
+    534  f20e		       c5 81		      cmp	P0POSY	;		     -
+    535  f210		       30 f9		      BMI	.RIGHT_NEXT_LANE	;		     - Y is above A Lane so check Lane above
+    536  f212		       e9 07		      sbc	#X_LANE_WALK_UP	;		     - Walk up zone		
+    537  f214		       c5 81		      cmp	P0POSY	;		     - 
+    538  f216		       30 12		      BMI	.RIGHT_WALK_UP	;		     - Branch to walk up if Y is <
+    539  f218		       e9 07		      sbc	#X_LANE_BLOCKED	;		     - Subtract to Blocked walk value
+    540  f21a		       c5 81		      cmp	P0POSY	;		     - 
+    541  f21c		       30 12		      BMI	.RIGHT_DONT_MOVE	;		     - Branch to blocked walk if Y is <
+    542  f21e		       e9 0f		      sbc	#X_LANE_WALK_DOWN	;		     - Subtract to Walk down value
+    543  f220		       c5 81		      cmp	P0POSY	;		     - 
+    544  f222		       f0 0f		      BEQ	.RIGHT_WALK	;		     - Branch to walk RIGHT if Y = 
+    545  f224				   .RIGHT_WALK_DOWN		;		     -
+    546  f224		       88		      dey		;		     - Move down 1
+    547  f225		       84 81		      sty	P0POSY	;		     - 
+    548  f227		       4c 3d f2 	      jmp	.RIGHT_RETURN	;		     - 
+    549  f22a				   .RIGHT_WALK_UP		;		     - 
+    550  f22a		       c8		      iny		;		     - 
+    551  f22b		       84 81		      sty	P0POSY	;		     - 
+    552  f22d		       4c 3d f2 	      jmp	.RIGHT_RETURN	;		     - 
+    553  f230				   .RIGHT_DONT_MOVE		;		     - 
+    554  f230		       4c 3d f2 	      jmp	.RIGHT_RETURN	;		     - 
+    555  f233				   .RIGHT_WALK		;		     - 
+    556  f233		       e8		      inx		;		     - Move RIGHT
+    557  f234		       4c 37 f2 	      jmp	.RIGHT_EXIT	;		     - 
+    558  f237				   .RIGHT_EXIT		;		     - 
+    559  f237		       e0 6c		      cpx	#RIGHT_BOUNDS	;		     - Test new X position against RIGHT of level
+    560  f239		       f0 02		      beq	.RIGHT_RETURN	;		     - Skip storing update if out of bounds
+    561  f23b		       86 80		      stx	P0POSX	;		     - Store new X position
+    562  f23d				   .RIGHT_RETURN		;		     - Don't add any more direction (We only support 4 direction movement)
+    563  f23d		       60		      rts		;		     -
+    564  f23e				   INP_P0_RST		;		     - Reset animation cause there was no input
+    565  f23e		       a9 00		      lda	#SPRITE_OFFSET_IDLE	;		     - Idle Animation Frame base address
+    566  f240		       18		      clc		;		     - Clear the carry flag
+    567  f241		       65 8a		      adc	ANIM_FRAME	;		     - Add current anim frame offset
+    568  f243		       85 86		      sta	P0ANMSET	;		     - Store frame to P0 Animation
+    569  f245				   IPT_P0_ND  Subroutine		;		     - End animation
+    570  f245		       60		      rts
+    571  f246							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    572  f246							;; Start next frame
+    573  f246							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    574  f246				   NEXTFRAME
+    575  f246		       4c 37 f0 	      jmp	STARTFRAME
+    576  f249							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    577  f249							;; Check for object collision
+    578  f249							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    579  f249
+    580  f249				   CKCOLP0PF  subroutine
+    581  f249		       a9 80		      lda	#%10000000	; CXP0FB bit 7 detects P0 and PF collision
+    582  f24b		       24 02		      bit	CXP0FB	; Check CXP0FB with above pattern
+    583  f24d		       d0 03		      bne	.COLP0PF	; if Collision P0 PF happened
+    584  f24f		       4c 53 f2 	      jmp	ENDCKCOL	; else, skip
+    585  f252				   .COLP0PF
+    586  f252		       60		      rts		; Go back to caller and they remove direction
+    587  f253
+    588  f253				   ENDCKCOL		; Fallback
+    589  f253		       85 2c		      sta	CXCLR	; Reset Collision
+    590  f255		       4c 37 f0 	      jmp	STARTFRAME	; Didn't collide go to next frame
+    591  f258
+    592  f258							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    593  f258							;; Sprites
+    594  f258							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    595  f258		       00 44	   FRAMETEST  =	#$44
+    596  f258							;PLAYER_HEIGHT = #17
+    597  f258				   IdleSprite
+    598  f258		       00		      .byte.b	#%00000000	;$0E
+    599  f259		       28		      .byte.b	#%00101000	;$58
+    600  f25a		       28		      .byte.b	#%00101000	;$58
+    601  f25b		       38		      .byte.b	#%00111000	;$0E
+    602  f25c		       38		      .byte.b	#%00111000	;$9A
+    603  f25d		       82		      .byte.b	#%10000010	;$42
+    604  f25e		       ba		      .byte.b	#%10111010	;$02
+    605  f25f		       fe		      .byte.b	#%11111110	;$9A
+    606  f260		       7c		      .byte.b	#%01111100	;$9A
+    607  f261		       38		      .byte.b	#%00111000	;$0E
+    608  f262		       7c		      .byte.b	#%01111100	;$58
+    609  f263		       44		      .byte.b	#%01000100	;$0E
+    610  f264		       44		      .byte.b	#%01000100	;$0E
+    611  f265		       7c		      .byte.b	#%01111100	;$58
+    612  f266		       38		      .byte.b	#%00111000	;$0E
+    613  f267		       0c		      .byte.b	#%00001100	;$58
+    614  f268		       0c		      .byte.b	#%00001100	;$58
+    615  f268		       00 11	   PLAYER_HEIGHT =	* - IdleSprite
+    616  f269				   DownSprite
+    617  f269		       00		      .byte.b	#%00000000	;$0E
+    618  f26a		       20		      .byte.b	#%00100000	;$58
+    619  f26b		       28		      .byte.b	#%00101000	;$58
+    620  f26c		       38		      .byte.b	#%00111000	;$0E
+    621  f26d		       38		      .byte.b	#%00111000	;$9A
+    622  f26e		       02		      .byte.b	#%00000010	;$42
+    623  f26f		       ba		      .byte.b	#%10111010	;$02
+    624  f270		       fe		      .byte.b	#%11111110	;$9A
+    625  f271		       7c		      .byte.b	#%01111100	;$9A
+    626  f272		       38		      .byte.b	#%00111000	;$0E
+    627  f273		       7c		      .byte.b	#%01111100	;$58
+    628  f274		       4c		      .byte.b	#%01001100	;$0E
+    629  f275		       4c		      .byte.b	#%01001100	;$0E
+    630  f276		       7c		      .byte.b	#%01111100	;$58
+    631  f277		       38		      .byte.b	#%00111000	;$0E
+    632  f278		       0c		      .byte.b	#%00001100	;$58
+    633  f279		       0c		      .byte.b	#%00001100	;$58
+    634  f27a				   UpSprite
+    635  f27a		       00		      .byte.b	#%00000000	;$0E
+    636  f27b		       20		      .byte.b	#%00100000	;$58
+    637  f27c		       28		      .byte.b	#%00101000	;$58
+    638  f27d		       38		      .byte.b	#%00111000	;$0E
+    639  f27e		       38		      .byte.b	#%00111000	;$9A
+    640  f27f		       02		      .byte.b	#%00000010	;$42
+    641  f280		       ba		      .byte.b	#%10111010	;$02
+    642  f281		       fe		      .byte.b	#%11111110	;$9A
+    643  f282		       7c		      .byte.b	#%01111100	;$9A
+    644  f283		       38		      .byte.b	#%00111000	;$0E
+    645  f284		       7c		      .byte.b	#%01111100	;$58
+    646  f285		       7c		      .byte.b	#%01111100	;$0E
+    647  f286		       7c		      .byte.b	#%01111100	;$0E
+    648  f287		       7c		      .byte.b	#%01111100	;$58
+    649  f288		       38		      .byte.b	#%00111000	;$0E
+    650  f289		       60		      .byte.b	#%01100000	;$58
+    651  f28a		       60		      .byte.b	#%01100000	;$58
+    652  f28b				   RightSprite
+    653  f28b		       00		      .byte.b	#%00000000	;$0E
+    654  f28c		       4c		      .byte.b	#%01001100	;$58
+    655  f28d		       68		      .byte.b	#%01101000	;$58
+    656  f28e		       38		      .byte.b	#%00111000	;$0E
+    657  f28f		       38		      .byte.b	#%00111000	;$9A
+    658  f290		       44		      .byte.b	#%01000100	;$42
+    659  f291		       78		      .byte.b	#%01111000	;$02
+    660  f292		       78		      .byte.b	#%01111000	;$9A
+    661  f293		       38		      .byte.b	#%00111000	;$9A
+    662  f294		       38		      .byte.b	#%00111000	;$0E
+    663  f295		       7c		      .byte.b	#%01111100	;$58
+    664  f296		       60		      .byte.b	#%01100000	;$0E
+    665  f297		       60		      .byte.b	#%01100000	;$0E
+    666  f298		       7c		      .byte.b	#%01111100	;$58
+    667  f299		       38		      .byte.b	#%00111000	;$0E
+    668  f29a		       30		      .byte.b	#%00110000	;$58
+    669  f29b		       30		      .byte.b	#%00110000	;$58
+    670  f29c				   IdleSprite1
+    671  f29c		       00		      .byte.b	#%00000000	;$0E
+    672  f29d		       28		      .byte.b	#%00101000	;$58
+    673  f29e		       28		      .byte.b	#%00101000	;$58
+    674  f29f		       38		      .byte.b	#%00111000	;$0E
+    675  f2a0		       38		      .byte.b	#%00111000	;$9A
+    676  f2a1		       44		      .byte.b	#%01000100	;$42
+    677  f2a2		       ba		      .byte.b	#%10111010	;$02
+    678  f2a3		       fe		      .byte.b	#%11111110	;$9A
+    679  f2a4		       7c		      .byte.b	#%01111100	;$9A
+    680  f2a5		       38		      .byte.b	#%00111000	;$0E
+    681  f2a6		       7c		      .byte.b	#%01111100	;$58
+    682  f2a7		       44		      .byte.b	#%01000100	;$0E
+    683  f2a8		       44		      .byte.b	#%01000100	;$0E
+    684  f2a9		       7c		      .byte.b	#%01111100	;$58
+    685  f2aa		       38		      .byte.b	#%00111000	;$0E
+    686  f2ab		       0c		      .byte.b	#%00001100	;$58
+    687  f2ac		       0c		      .byte.b	#%00001100	;$58
+    688  f2ad				   DownSprite1
+    689  f2ad		       00		      .byte.b	#%00000000	;$0E
+    690  f2ae		       08		      .byte.b	#%00001000	;$58
+    691  f2af		       28		      .byte.b	#%00101000	;$58
+    692  f2b0		       38		      .byte.b	#%00111000	;$0E
+    693  f2b1		       38		      .byte.b	#%00111000	;$9A
+    694  f2b2		       80		      .byte.b	#%10000000	;$42
+    695  f2b3		       ba		      .byte.b	#%10111010	;$02
+    696  f2b4		       fe		      .byte.b	#%11111110	;$9A
+    697  f2b5		       7c		      .byte.b	#%01111100	;$9A
+    698  f2b6		       38		      .byte.b	#%00111000	;$0E
+    699  f2b7		       7c		      .byte.b	#%01111100	;$58
+    700  f2b8		       64		      .byte.b	#%01100100	;$0E
+    701  f2b9		       64		      .byte.b	#%01100100	;$0E
+    702  f2ba		       7c		      .byte.b	#%01111100	;$58
+    703  f2bb		       38		      .byte.b	#%00111000	;$0E
+    704  f2bc		       60		      .byte.b	#%01100000	;$58
+    705  f2bd		       60		      .byte.b	#%01100000	;$58
+    706  f2be				   UpSprite1
+    707  f2be		       00		      .byte.b	#%00000000	;$0E
+    708  f2bf		       08		      .byte.b	#%00001000	;$58
+    709  f2c0		       28		      .byte.b	#%00101000	;$58
+    710  f2c1		       38		      .byte.b	#%00111000	;$0E
+    711  f2c2		       38		      .byte.b	#%00111000	;$9A
+    712  f2c3		       80		      .byte.b	#%10000000	;$42
+    713  f2c4		       ba		      .byte.b	#%10111010	;$02
+    714  f2c5		       fe		      .byte.b	#%11111110	;$9A
+    715  f2c6		       7c		      .byte.b	#%01111100	;$9A
+    716  f2c7		       38		      .byte.b	#%00111000	;$0E
+    717  f2c8		       7c		      .byte.b	#%01111100	;$58
+    718  f2c9		       7c		      .byte.b	#%01111100	;$0E
+    719  f2ca		       7c		      .byte.b	#%01111100	;$0E
+    720  f2cb		       7c		      .byte.b	#%01111100	;$58
+    721  f2cc		       38		      .byte.b	#%00111000	;$0E
+    722  f2cd		       0c		      .byte.b	#%00001100	;$58
+    723  f2ce		       0c		      .byte.b	#%00001100	;$58
+    724  f2cf				   RightSprite1
+    725  f2cf		       00		      .byte.b	#%00000000	;$0E
+    726  f2d0		       18		      .byte.b	#%00011000	;$58
+    727  f2d1		       30		      .byte.b	#%00110000	;$58
+    728  f2d2		       38		      .byte.b	#%00111000	;$0E
+    729  f2d3		       38		      .byte.b	#%00111000	;$9A
+    730  f2d4		       30		      .byte.b	#%00110000	;$42
+    731  f2d5		       38		      .byte.b	#%00111000	;$02
+    732  f2d6		       38		      .byte.b	#%00111000	;$9A
+    733  f2d7		       38		      .byte.b	#%00111000	;$9A
+    734  f2d8		       38		      .byte.b	#%00111000	;$0E
+    735  f2d9		       7c		      .byte.b	#%01111100	;$58
+    736  f2da		       70		      .byte.b	#%01110000	;$0E
+    737  f2db		       70		      .byte.b	#%01110000	;$0E
+    738  f2dc		       7c		      .byte.b	#%01111100	;$58
+    739  f2dd		       38		      .byte.b	#%00111000	;$0E
+    740  f2de		       60		      .byte.b	#%01100000	;$58
+    741  f2df		       60		      .byte.b	#%01100000	;$58  
+    742  f2e0
+    743  f2e0							;---End Graphics Data---
+    744  f2e0
+    745  f2e0				   Bomb0
+    746  f2e0		       00		      .byte.b	#%00000000	;$0E
+    747  f2e1		       18		      .byte.b	#%00011000	;$0E
+    748  f2e2		       3c		      .byte.b	#%00111100	;$0E
+    749  f2e3		       3c		      .byte.b	#%00111100	;$0E
+    750  f2e4		       3c		      .byte.b	#%00111100	;$0E
+    751  f2e5		       3c		      .byte.b	#%00111100	;$0E
+    752  f2e6		       18		      .byte.b	#%00011000	;$0E
+    753  f2e7		       0a		      .byte.b	#%00001010	;$1C
+    754  f2e8		       04		      .byte.b	#%00000100	;$1C
+    755  f2e9
+    756  f2e9							;---Color Data from PlayerPal 2600---
+    757  f2e9				   ColorFrame0
+    758  f2e9		       0e		      .byte.b	#$0E	;
+    759  f2ea		       58		      .byte.b	#$58	;
+    760  f2eb		       58		      .byte.b	#$58	;
+    761  f2ec		       0e		      .byte.b	#$0E	;
+    762  f2ed		       9a		      .byte.b	#$9A	;
+    763  f2ee		       42		      .byte.b	#$42	;
+    764  f2ef		       02		      .byte.b	#$02	;
+    765  f2f0		       9a		      .byte.b	#$9A	;
+    766  f2f1		       9a		      .byte.b	#$9A	;
+    767  f2f2		       0e		      .byte.b	#$0E	;
+    768  f2f3		       58		      .byte.b	#$58	;
+    769  f2f4		       0e		      .byte.b	#$0E	;
+    770  f2f5		       0e		      .byte.b	#$0E	;
+    771  f2f6		       58		      .byte.b	#$58	;
+    772  f2f7		       0e		      .byte.b	#$0E	;
+    773  f2f8		       58		      .byte.b	#$58	;
+    774  f2f9		       58		      .byte.b	#$58	;
+    775  f2fa				   ColorFrame1
+    776  f2fa		       0e		      .byte.b	#$0E	;
+    777  f2fb		       58		      .byte.b	#$58	;
+    778  f2fc		       58		      .byte.b	#$58	;
+    779  f2fd		       0e		      .byte.b	#$0E	;
+    780  f2fe		       9a		      .byte.b	#$9A	;
+    781  f2ff		       42		      .byte.b	#$42	;
+    782  f300		       02		      .byte.b	#$02	;
+    783  f301		       9a		      .byte.b	#$9A	;
+    784  f302		       9a		      .byte.b	#$9A	;
+    785  f303		       0e		      .byte.b	#$0E	;
+    786  f304		       58		      .byte.b	#$58	;
+    787  f305		       0e		      .byte.b	#$0E	;
+    788  f306		       0e		      .byte.b	#$0E	;
+    789  f307		       58		      .byte.b	#$58	;
+    790  f308		       0e		      .byte.b	#$0E	;
+    791  f309		       58		      .byte.b	#$58	;
+    792  f30a		       58		      .byte.b	#$58	;
+    793  f30b				   ColorFrame2
+    794  f30b		       0e		      .byte.b	#$0E	;
+    795  f30c		       58		      .byte.b	#$58	;
+    796  f30d		       58		      .byte.b	#$58	;
+    797  f30e		       0e		      .byte.b	#$0E	;
+    798  f30f		       9a		      .byte.b	#$9A	;
+    799  f310		       42		      .byte.b	#$42	;
+    800  f311		       02		      .byte.b	#$02	;
+    801  f312		       9a		      .byte.b	#$9A	;
+    802  f313		       9a		      .byte.b	#$9A	;
+    803  f314		       0e		      .byte.b	#$0E	;
+    804  f315		       58		      .byte.b	#$58	;
+    805  f316		       0e		      .byte.b	#$0E	;
+    806  f317		       0e		      .byte.b	#$0E	;
+    807  f318		       58		      .byte.b	#$58	;
+    808  f319		       0e		      .byte.b	#$0E	;
+    809  f31a		       58		      .byte.b	#$58	;
+    810  f31b		       58		      .byte.b	#$58	;
+    811  f31c				   ColorFrame3
+    812  f31c		       0e		      .byte.b	#$0E	;
+    813  f31d		       58		      .byte.b	#$58	;
+    814  f31e		       58		      .byte.b	#$58	;
+    815  f31f		       0e		      .byte.b	#$0E	;
+    816  f320		       9a		      .byte.b	#$9A	;
+    817  f321		       42		      .byte.b	#$42	;
+    818  f322		       02		      .byte.b	#$02	;
+    819  f323		       9a		      .byte.b	#$9A	;
+    820  f324		       9a		      .byte.b	#$9A	;
+    821  f325		       0e		      .byte.b	#$0E	;
+    822  f326		       58		      .byte.b	#$58	;
+    823  f327		       0e		      .byte.b	#$0E	;
+    824  f328		       0e		      .byte.b	#$0E	;
+    825  f329		       58		      .byte.b	#$58	;
+    826  f32a		       0e		      .byte.b	#$0E	;
+    827  f32b		       58		      .byte.b	#$58	;
+    828  f32c		       58		      .byte.b	#$58	;
+    829  f32d				   ColorFrame4
+    830  f32d		       0e		      .byte.b	#$0E	;
+    831  f32e		       58		      .byte.b	#$58	;
+    832  f32f		       58		      .byte.b	#$58	;
+    833  f330		       0e		      .byte.b	#$0E	;
+    834  f331		       9a		      .byte.b	#$9A	;
+    835  f332		       42		      .byte.b	#$42	;
+    836  f333		       02		      .byte.b	#$02	;
+    837  f334		       9a		      .byte.b	#$9A	;
+    838  f335		       9a		      .byte.b	#$9A	;
+    839  f336		       0e		      .byte.b	#$0E	;
+    840  f337		       58		      .byte.b	#$58	;
+    841  f338		       0e		      .byte.b	#$0E	;
+    842  f339		       0e		      .byte.b	#$0E	;
+    843  f33a		       58		      .byte.b	#$58	;
+    844  f33b		       0e		      .byte.b	#$0E	;
+    845  f33c		       58		      .byte.b	#$58	;
+    846  f33d		       58		      .byte.b	#$58	;
+    847  f33e				   ColorFrame5
+    848  f33e		       0e		      .byte.b	#$0E	;
+    849  f33f		       58		      .byte.b	#$58	;
+    850  f340		       58		      .byte.b	#$58	;
+    851  f341		       0e		      .byte.b	#$0E	;
+    852  f342		       9a		      .byte.b	#$9A	;
+    853  f343		       42		      .byte.b	#$42	;
+    854  f344		       02		      .byte.b	#$02	;
+    855  f345		       9a		      .byte.b	#$9A	;
+    856  f346		       9a		      .byte.b	#$9A	;
+    857  f347		       0e		      .byte.b	#$0E	;
+    858  f348		       58		      .byte.b	#$58	;
+    859  f349		       0e		      .byte.b	#$0E	;
+    860  f34a		       0e		      .byte.b	#$0E	;
+    861  f34b		       58		      .byte.b	#$58	;
+    862  f34c		       0e		      .byte.b	#$0E	;
+    863  f34d		       58		      .byte.b	#$58	;
+    864  f34e		       58		      .byte.b	#$58	;
+    865  f34f				   ColorFrame6
+    866  f34f		       0e		      .byte.b	#$0E	;
+    867  f350		       58		      .byte.b	#$58	;
+    868  f351		       58		      .byte.b	#$58	;
+    869  f352		       0e		      .byte.b	#$0E	;
+    870  f353		       9a		      .byte.b	#$9A	;
+    871  f354		       42		      .byte.b	#$42	;
+    872  f355		       02		      .byte.b	#$02	;
+    873  f356		       9a		      .byte.b	#$9A	;
+    874  f357		       9a		      .byte.b	#$9A	;
+    875  f358		       0e		      .byte.b	#$0E	;
+    876  f359		       58		      .byte.b	#$58	;
+    877  f35a		       0e		      .byte.b	#$0E	;
+    878  f35b		       0e		      .byte.b	#$0E	;
+    879  f35c		       58		      .byte.b	#$58	;
+    880  f35d		       0e		      .byte.b	#$0E	;
+    881  f35e		       58		      .byte.b	#$58	;
+    882  f35f		       58		      .byte.b	#$58	;
+    883  f360				   ColorFrame7
+    884  f360		       0e		      .byte.b	#$0E	;
+    885  f361		       58		      .byte.b	#$58	;
+    886  f362		       58		      .byte.b	#$58	;
+    887  f363		       0e		      .byte.b	#$0E	;
+    888  f364		       9a		      .byte.b	#$9A	;
+    889  f365		       42		      .byte.b	#$42	;
+    890  f366		       02		      .byte.b	#$02	;
+    891  f367		       9a		      .byte.b	#$9A	;
+    892  f368		       9a		      .byte.b	#$9A	;
+    893  f369		       0e		      .byte.b	#$0E	;
+    894  f36a		       58		      .byte.b	#$58	;
+    895  f36b		       0e		      .byte.b	#$0E	;
+    896  f36c		       0e		      .byte.b	#$0E	;
+    897  f36d		       58		      .byte.b	#$58	;
+    898  f36e		       0e		      .byte.b	#$0E	;
+    899  f36f		       58		      .byte.b	#$58	;
+    900  f370		       58		      .byte.b	#$58	;     
+    901  f371							;---End Color Data---
+    902  f371							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    903  f371							;; Arena
+    904  f371							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    905  f371				   ARENA_0_PF0
+    906  f371		       f0		      .byte.b	%11110000
+    907  f372		       10		      .byte.b	%00010000
+    908  f373		       50		      .byte.b	%01010000
+    909  f374		       10		      .byte.b	%00010000
+    910  f375		       50		      .byte.b	%01010000
+    911  f376		       10		      .byte.b	%00010000
+    912  f377		       50		      .byte.b	%01010000
+    913  f378		       10		      .byte.b	%00010000
+    914  f379		       50		      .byte.b	%01010000
+    915  f37a		       10		      .byte.b	%00010000
+    916  f37b		       50		      .byte.b	%01010000
+    917  f37c		       10		      .byte.b	%00010000
+    918  f37d		       f0		      .byte.b	%11110000
+    919  f37e
+    920  f37e				   ARENA_0_PF1
+    921  f37e		       e0		      .byte.b	%11100000
+    922  f37f		       e6		      .byte.b	%11100110
+    923  f380		       e0		      .byte.b	%11100000
+    924  f381		       e6		      .byte.b	%11100110
+    925  f382		       e0		      .byte.b	%11100000
+    926  f383		       e6		      .byte.b	%11100110
+    927  f384		       e0		      .byte.b	%11100000
+    928  f385		       e6		      .byte.b	%11100110
+    929  f386		       e0		      .byte.b	%11100000
+    930  f387		       e6		      .byte.b	%11100110
+    931  f388		       e0		      .byte.b	%11100000
+    932  f389
+    933  f389				   ARENA_0_PF2
+    934  f389		       00		      .byte.b	%00000000
+    935  f38a		       66		      .byte.b	%01100110
+    936  f38b		       00		      .byte.b	%00000000
+    937  f38c		       66		      .byte.b	%01100110
+    938  f38d		       00		      .byte.b	%00000000
+    939  f38e		       66		      .byte.b	%01100110
+    940  f38f		       00		      .byte.b	%00000000
+    941  f390		       66		      .byte.b	%01100110
+    942  f391		       00		      .byte.b	%00000000
+    943  f392		       66		      .byte.b	%01100110
+    944  f393		       00		      .byte.b	%00000000
+    945  f394
+    946  f394
+    947  f394							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    948  f394							;; Complete ROM size
+    949  f394							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    950  fffc					      org	$FFFC	; Move to position $FFFC
+    951  fffc		       00 f0		      .word.w	RESET	; Write 2 bytes with reset address
+    952  fffe		       00 f0		      .word.w	RESET	; Write 2 bytes with interruption vector
