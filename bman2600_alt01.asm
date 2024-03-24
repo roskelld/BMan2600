@@ -16,10 +16,9 @@ P0POSX                  byte        ; player position X
 P0POSY                  byte        ; player position Y
 P0SPRPTR                word        ; Pointer to P0 sprite lookup table
 P0COLPTR                word        ; Pointer to P0 color lookup table
-P0GRABUF		        byte		; Buffer for P0 graphics for one scanline
-P0COLBUF		        byte		; Buffer for P0 color for one scanline
+P0GRABUF		byte		; Buffer for P0 graphics for one scanline *ALTERATION
+P0COLBUF		byte		; Buffer for P0 color for one scanline *ALTERATION
 P0ANMSET                byte        ; P0 sprite animation frame offset
-P0DRAW                  byte        ; P0 Draw Height
 ANIMCOUNTER             byte        ; Current animation update countdown
 MOVECOUNTER             byte        ; Counter to track updating movement
 ANIM_FRAME              byte        ; Tracks if we're on first or second animation frame
@@ -27,34 +26,32 @@ ANIM_FRAME              byte        ; Tracks if we're on first or second animati
 ARENAINDEX              byte        ; Draw index of Arena
 ARENA_SWITCH            byte        ; Toggle tracker
 ARENACOUNTER            byte        ; Tracks the update for the arena
+; ARENAPTRPF1             word
+; ARENAPTRPF2             word
+ARENABUFFER		ds.b	22	; Buffer for arena layout data *ALTERATION
+STACKPTRBUFFER		byte		; Keep a copy of the stack pointer when we clobber it *ALTERATION
 
-ARENABUFFER		        ds.b	22	; Buffer for arena layout data
-STACKPTRBUFFER		    byte		; Keep a copy of the stack pointer when we clobber it
-
-BOMB_SPRITE_PTR         word        ;
-TEMP                    ds 1        ; Scratch Variable
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; Define Constants
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;PLAYER_HEIGHT                  = $11       ; player 0 sprite height (# rows in lookup table)
+P0_HGT                  = $11       ; player 0 sprite height (# rows in lookup table)
 MOVE_RATE               = 160       ; Speed of player movement (255 == 100%)
 ANIM_RATE               = 20        ; Speed of player movement (255 == 100%)
-SPRITE_OFFSET_IDLE      = 0         ; Offset position of facing idle sprite
+SPRITE_OFFSET_IDLE      = $0         ; Offset position of facing idle sprite
 SPRITE_OFFSET_DOWN      = $11       ; Offset position of facing down sprite
 SPRITE_OFFSET_UP        = $22       ; Offset position of facing up sprite
 SPRITE_OFFSET_RIGHT     = $33       ; Offset position of facing right sprite
 SPRITE_FRAME_OFFSET     = $44       ; Second frame of animation offset
-UP_BOUNDS               = $A8       ; Top Player Boundary
-DOWN_BOUNDS             = $10       ; Bottom Player Boundary
+UP_BOUNDS               = $98       ; Top Player Boundary
+DOWN_BOUNDS             = $00       ; Bottom Player Boundary
 LEFT_BOUNDS             = $0A       ; Left Player Boundary
 RIGHT_BOUNDS            = $6c       ; Right Player Boundary
 VERTICAL_STEP           = $1
 HORIZONTAL_STEP         = $1
-ARENA_HEIGHT            = $A5        ; (0-83)*2=166 scanlines for arena (2LK)
+ARENA_HEIGHT            = 87        ; (0-87)*2=176 scanlines for arena (2LK)
 ARENA_BG                = $C3
 
-X_LANE_START            = $10
-X_LANE_UPDATE           = $1E
+X_LANE_START            = $1E
 X_LANE_WALK_UP          = $7
 X_LANE_BLOCKED          = $7
 X_LANE_WALK_DOWN        = $F
@@ -65,9 +62,6 @@ Y_LANE_WALK_RIGHT       = $5
 Y_LANE_BLOCKED          = $5
 Y_LANE_WALK_LEFT        = $5
 
-BOMB_HGT                = $9
-TEST_BOMB_X             = $0A       ; 
-TEST_BOMB_Y             = $7A       ; Cell 38
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; Start ROM segment
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -84,7 +78,7 @@ RESET:
     sta ANIM_FRAME              ; Set first animation frame to 0
     lda #$0b
     sta P0POSX                  ; Set Player 0 X
-    lda #$A5
+    lda #$97
     sta P0POSY                  ; Set Player 0 Y
 
     lda #15
@@ -105,24 +99,32 @@ RESET:
     lda #>ColorFrame0
     sta P0COLPTR+1              ; hi-byte pointer for P0 color lookup table
 
-    lda #<Bomb0
-    sta BOMB_SPRITE_PTR
-    lda #>Bomb0
-    sta BOMB_SPRITE_PTR+1
 
-                                ; Cycles    Total   - Comment
+; *ALTERATION below
 ; Fill the arena buffer in RAM from ROM
-	ldx #21			            ;      2            - Memory offset value for ARENABUFFER
-	ldy #10			            ;      2            - Index of PF graphic data (start from end)
+	ldx #21			; 2
+	ldy #10			; 2
 FILL_ARENA_BUFFER:
-	lda ARENA_0_PF1,y			;      4            - Load PF1 Arena Data with Y offset
-	sta ARENABUFFER,x	        ;      4            - Store in RAM with X index offset
-	dex			                ;      2            - Shift X index for next update
-	lda ARENA_0_PF2,y	        ;      4            - Load PF1 Arena Data with Y offset
-	sta ARENABUFFER,x	        ;      4            - Store in RAM with X index offset
-	dex			                ;      2            - Shift X index for next update
-	dey			                ;      2            - Shift Y index for next update
-	bpl FILL_ARENA_BUFFER	    ;    2/3            - Loop if still plus
+	lda ARENA_0_PF1,y	; 4(5?)
+	sta ARENABUFFER,x	; 4
+	dex			; 2
+	lda ARENA_0_PF2,y	; 4(5?)
+	sta ARENABUFFER,x	; 4
+	dex			; 2
+	dey			; 2
+	bpl FILL_ARENA_BUFFER	; 3/2
+; *ALTERATION ends
+
+
+    ; lda #<ARENA_0_PF1
+    ; sta ARENAPTRPF1
+    ; lda #>ARENA_0_PF1
+    ; sta ARENAPTRPF1+1
+
+    ; lda #<ARENA_0_PF2
+    ; sta ARENAPTRPF2
+    ; lda #>ARENA_0_PF2
+    ; sta ARENAPTRPF2+1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; Start a new frame loop
@@ -163,9 +165,10 @@ MOVEUPDATE:                     ;                   -
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Display 192 SCANLINES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; clean up ;; find a better place to do this
     lda #0
-    sta P0GRABUF		        ;
-	sta P0COLBUF		        ;
+	sta P0GRABUF		; *ALTERATION
+	sta P0COLBUF		; *ALTERATION
     sta ARENAINDEX
                                 ; Cycles    Total   - Comment
     ldx #25                     ;  2                - Score scanlines
@@ -178,99 +181,117 @@ SCORE_PANEL:
     sta WSYNC                   ;  3                - wait for scanline
     dex                         ;  2                - X--
     bne SCORE_PANEL             ;  2                - repeat until score panel is drawn
-ARENA_SETUP:
+GAME_SCREEN_SETUP:
     lda #ARENA_BG               ;                   - background color  (61st scanline)
     sta COLUBK                  ;                   - set background color
     lda #$09                    ;                   - playfield color
     sta COLUPF                  ;                   - set playfield color
 
-    tsx                         ;     2             - Save SP (Stack Pointer) before clobbering it 
-    stx STACKPTRBUFFER          ;     3             - Store old SP (Stack pointer) to RAM
-    ldx #<ARENABUFFER-1         ;     2             - Load Arena Graphic slice from RAM
-    txs                         ;     2             - Store Arena Graphic on the SP (Stack Pointer)
 
-    ldx #177                    ;                   - playfield scanlines
+; *ALTERATION below
+	tsx			; 2 Save a copy of the stack pointer before we clobber it
+	stx STACKPTRBUFFER	; 3
+	ldx #<ARENABUFFER-1	; 2 Set the stack pointer up to read out arena layout bytes
+	txs			; 2
+
+    ldx #165                    ;                   - playfield scanlines
+    lda #1
+    sta ARENACOUNTER            ;                   - We pull new arena data every 15 lines
     lda #%11110000              ; 2                 - Load PF0 slice (Always the same, so outside of loop)
     sta PF0                     ; 3                 - set PF0
-    lda #%11111111              ; 2                 - Load PF0 slice (Always the same, so outside of loop)
-    sta PF2                     ;
-    sta PF1                     ;
-;---------------------------------------------------- START OF GAME PLAY ZONE 
-                                ; Cycles    Total   - Comment
-    sta WSYNC                   ;     3             - Start a fresh line
-.SLINE_LOOP                     ; (14 Cycles)       - Gameplay Zone Scanline Loop
-    lda P0GRABUF                ;     3             - Load P0 graphic buffer
-    sta GRP0                    ;     3             - Send P0 data to TIA
-	lda P0COLBUF		        ;     3             - Load P0 color buffer
-	sta COLUP0		            ;     3             - Send P0 data to TIA
-    dex                         ;     2             - Decrement scanline counter
+; *ALTERATION ends
 
-                                ; (11/12 Cycles)    - Check if need to Draw P0
-    txa                         ;     2             - Buffer P0 data for next scanline
-    sec                         ;     2             - 
-    sbc P0POSY                  ;     3             - Player Y from scanline height
-    cmp #PLAYER_HEIGHT          ;     2             - Player Height
-    bcs .NO_P0                  ;   2/3             - Branch if not needing to draw P0
+; New scanline loop *ALTERATION
+	sta WSYNC		; 3
+.SLINE_LOOP
+; (total 0 cycles)
 
-    adc P0ANMSET                ;     3             - 
-    tay                         ;     2             -
-    lda (P0SPRPTR),y            ;     5             - 
-    sta P0GRABUF                ;
-    lda (P0COLPTR),y            ;
-    sta P0COLBUF                ;
-    bcc .AFTER_P0               ;
+	lda P0GRABUF		; 3 Send Player 0 data to TIA
+	sta GRP0		; 3
+	lda P0COLBUF		; 3
+	sta COLUP0		; 3
+	dex			; 2 Decrement scanline counter and start working on data for the next scanline
+; (14 cycles, total 14 cycles)
+
+	txa			; 2 Buffer Player 0 data for next scanline
+	sec			; 2 TODO Necessary?
+	sbc P0POSY		; 3
+	cmp #P0_HGT		; 2
+	bcs .NO_P0		; 2/3
+; (11 cycles, total 25 cycles)
+
+	adc P0ANMSET		; 3 NOTE: The carry flag is always set here, so rather than spend 2 cycles clearing it, just subtract 1 from P0ANMSET when calculating it.
+	tay			; 2
+	lda (P0SPRPTR),y	; 5
+	sta P0GRABUF		; 3
+	lda (P0COLPTR),y	; 5
+	sta P0COLBUF		; 3
+	bcc .AFTER_P0		; 3 Replace with a JMP instruction if you're nervous about the carry flag being clear after the ADC, or page breaks (+1 byte)
+;	jmp .AFTER_P0		; 3
+; (24 cycles, total 49 cycles)
 
 .NO_P0
-    lda #0                      ;
-    sta P0GRABUF                ;
-    ldy #3                      ;
+; (total 26 cycles)
+	lda #0			; 2 Store blank pattern data to the Player 0 graphics buffer
+	sta P0GRABUF		; 3
 
+	ldy #3			; 2 Waste (5 * Y) + 1 cycles for timing
 .BUSYWAIT_01
-    dey                         ;
-    bne .BUSYWAIT_01            ;
-    nop                         ;
+	dey			; 2
+	bne .BUSYWAIT_01	; 3/2
+
+	nop			; 2 Waste 2 more cycles for timing
+; (23 cycles, total 49 cycles)
+
 .AFTER_P0
-    txa                         ;
-    and #$0f                    ;
-    bne .NO_PF                  ;
+; (total 49 cycles)
 
-    nop                         ;
-    pla                         ;
-    sta PF2                     ;
-    pla                         ;
-    sta PF1                     ;
+; Make the arena sections 16 scanlines high. This tiny change saves 1 byte of RAM, as well as 1 cycle every loop on the test against ARENACOUNTER, plus another 5 cycles in every 15 scanlines by not needing to reset it.
+	txa			; 2 Test if this scanline is a multiple of 16
+	and #$0f		; 2
+	bne .NO_PF		; 2/3
+; (6 cycles, total 55 cycles)
 
-    cpx #0                      ;
-    bne .SLINE_LOOP             ;
+	nop			; 2 Waste 2 cycles for timing, so we don't write to PF1/2 too early
+
+	pla			; 4 Pull the arena data off the stack and send it to TIA
+	sta PF2			; 3
+	pla			; 4
+	sta PF1			; 3
+; (16 cycles, total 71 cycles)
+
+	cpx #0			; 2
+	bne .SLINE_LOOP		; 3
+; (total 76 cycles)
 
 .NO_PF
-    nop                         ;
-    nop                         ;
-    nop                         ;
-    nop                         ;
-    nop                         ;
-    nop                         ;
-    cmp $80                     ;
-    cpx #0                      ;
-    bne .SLINE_LOOP             ;
+; (total 56 cycles)
+	nop			; 2 Waste 15 cycles for timing
+	nop			; 2
+	nop			; 2
+	nop			; 2
+	nop			; 2
+	nop			; 2
+	cmp $80			; 3
 
-    ldx STACKPTRBUFFER          ;
-    txs                         ;
+	cpx #0			; 2
+	bne .SLINE_LOOP		; 3
+; (total 76 cycles)
 
-;---------------------------------------------------- END OF GAME PLAY ZONE
-
-
+	ldx STACKPTRBUFFER	; 3 Restore the stack pointer
+	txs			; 2
+; *ALTERATION ends
 
 .BOTTOM                         ;                   - [BOTTOM PANEL] Start of Bottom Panel
     sta WSYNC                   ;-----3 ----78------- wait for scanline
-;    ldx #0                      ;     2             - Bottom panel scanlines (6 for P0 color 19 for not)
+    ldx #18                      ;     2             - Bottom panel scanlines
     lda #$07                    ;     2             - panel color
     sta COLUBK                  ;     3             - background
     sta COLUPF                  ;     3             - playfield set both the same to create border
-;BOTTOM_PANEL:
-;    sta WSYNC                   ;                   - wait for scanline
-;    dex                         ;                   - X--
-;    bne BOTTOM_PANEL            ;                   - repeat until screen is drawn
+BOTTOM_PANEL:
+    sta WSYNC                   ;                   - wait for scanline
+    dex                         ;                   - X--
+    bne BOTTOM_PANEL            ;                   - repeat until screen is drawn
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OVERSCAN - 30 SCANLINES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -279,56 +300,6 @@ OVERSCAN:
     TIMER_WAIT
 
     jmp NEXTFRAME
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Subroutine to handle object horizontal position with fine offset
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; A is target X-coord position
-;; Y is object (0: P0, 1: P1, 2: MISSILE0, 3: MISSILE1, 4: BALL)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SETXPOS Subroutine
-    sta WSYNC                   ; Start fresh scanline
-    sta HMCLR                   ; clear old horizontal position values
-    sec                         ; set carry flag before subtraction
-.DIVIDE_LOOP:   
-    sbc #15                     ; A -= 15
-    bcs .DIVIDE_LOOP            ; Loop while carry flag is still set
-
-    eor #7                      ; adjust remainder in A between -8 and 7
-    asl                         ; shift left by 4 as HMP0 only uses 4 bits
-    asl
-    asl
-    asl
-    sta HMP0,Y                  ; set the fine position
-    sta RESP0,Y                 ; reset the 15-step rough position
-    sta WSYNC                   ;
-    sta HMOVE                   ; Apply fine position
-
-    ; Prepare P0 Y for 2LK
-    ; ldx #1                      ; preload X for setting VDELPx
-    ; lda P0POSY                  ; get the P0 Y position
-    ; ;clc                         ;
-    ; ;adc #1                      ; add 1 to compensate for priming of GRP0 
-    ; ; Removed the divide, not sure how to incorporate it into the code
-    ; ;lsr                         ; divide by 2 for the 2LK position
-    ; sta TEMP                    ; save for position calculations
-
-    ; ; P0 Sprite Height in Arena
-    ; ; P0DRAW = ARENA_HEIGHT + PLAYER_HEIGHT - P0POSY + 1
-    ; lda #(ARENA_HEIGHT + PLAYER_HEIGHT)
-    ; sec 
-    ; sbc P0POSY
-    ; sta P0DRAW
-
-    ; ; P0 Sprite Pointer
-    ; lda #<(#IdleSprite + PLAYER_HEIGHT - 1) 
-    ; sec
-    ; sbc TEMP
-    ; sta P0SPRPTR
-    ; lda #>(#IdleSprite + PLAYER_HEIGHT - 1)
-    ; sbc #0
-    ; sta P0SPRPTR+1
-
-    rts 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Process joystick input for player 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -454,9 +425,9 @@ IPT_P0_LT:
 
     ;; Lane Check Loop
     ldy P0POSY
-    lda #X_LANE_START            ;                   - Sets a to bottom bounds
+    lda #0                      ;                   - Clears A so it can add lane loop value
 .LEFT_NEXT_LANE                 ;                   -
-    adc #X_LANE_UPDATE           ;                   - Lane loop value
+    adc #X_LANE_START           ;                   - Lane loop value
 .LEFT_LOOP                      ;                   -
     clc                         ;                   -
     cmp P0POSY                  ;                   -
@@ -502,9 +473,9 @@ IPT_P0_RT:
 
     ;; Lane Check Loop
     ldy P0POSY
-    lda #X_LANE_START            ;                   - Sets a to bottom bounds
+    lda #0                      ;                   - Clears A so it can add lane loop value
 .RIGHT_NEXT_LANE                ;                   -
-    adc #X_LANE_UPDATE           ;                   - Lane loop value
+    adc #X_LANE_START           ;                   - Lane loop value
 .RIGHT_LOOP                     ;                   -
     clc                         ;                   -
     cmp P0POSY                  ;                   -
@@ -566,6 +537,32 @@ ENDCKCOL:                       ; Fallback
     jmp STARTFRAME              ; Didn't collide go to next frame
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Subroutine to handle object horizontal position with fine offset
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; A is target X-coord position
+;; Y is object (0: P0, 1: P1, 2: MISSILE0, 3: MISSILE1, 4: BALL)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SETXPOS Subroutine
+    lda P0POSX                  ; load register A with P0 position X
+    sta WSYNC                   ; Start fresh scanline
+    sta HMCLR                   ; clear old horizontal position values
+    sec                         ; set carry flag before subtraction
+.DIVIDE_LOOP:   
+    sbc #15                     ; A -= 15
+    bcs .DIVIDE_LOOP            ; Loop while carry flag is still set
+
+    eor #7                      ; adjust remainder in A between -8 and 7
+    asl                         ; shift left by 4 as HMP0 only uses 4 bits
+    asl
+    asl
+    asl
+    sta HMP0,Y                  ; set the fine position
+    sta RESP0,Y                 ; reset the 15-step rough position
+    sta WSYNC                   ;
+    sta HMOVE                   ; Apply fine position
+    rts 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sprites
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 IdleSprite:
@@ -586,7 +583,6 @@ IdleSprite:
         .byte #%00111000;$0E
         .byte #%00001100;$58
         .byte #%00001100;$58
-PLAYER_HEIGHT = * - IdleSprite
 DownSprite:
         .byte #%00000000;$0E
         .byte #%00100000;$58
@@ -713,19 +709,7 @@ RightSprite1:
         .byte #%00111000;$0E
         .byte #%01100000;$58
         .byte #%01100000;$58  
-
 ;---End Graphics Data---
-
-Bomb0
-        .byte #%00000000;$0E
-        .byte #%00011000;$0E
-        .byte #%00111100;$0E
-        .byte #%00111100;$0E
-        .byte #%00111100;$0E
-        .byte #%00111100;$0E
-        .byte #%00011000;$0E
-        .byte #%00001010;$1C
-        .byte #%00000100;$1C
 
 ;---Color Data from PlayerPal 2600---
 ColorFrame0
